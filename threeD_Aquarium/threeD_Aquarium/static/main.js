@@ -40,24 +40,23 @@ scene.add(groundMesh);
 // scene.add(spotLight);
 
 const spotLight = new THREE.SpotLight( 0xffffff, 100 );
-spotLight.position.set( 2.5, 5, 2.5 );
+spotLight.position.set( 2.5, 6, 8.5 );
 spotLight.angle = Math.PI / 6;
 spotLight.penumbra = 1;
 spotLight.decay = 2;
-spotLight.distance = 0;
+spotLight.distance = 100;
 // spotLight.map = textures[ 'disturb.jpg' ];
 
 spotLight.castShadow = true;
 spotLight.shadow.mapSize.width = 1024;
 spotLight.shadow.mapSize.height = 1024;
 spotLight.shadow.camera.near = 1;
-spotLight.shadow.camera.far = 10;
+spotLight.shadow.camera.far = 100;
 spotLight.shadow.focus = 1;
 scene.add( spotLight );
 
 const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.5 );
 scene.add( ambient );
-
 // renderer.render(scene, camera);
 
 const loader = new GLTFLoader().setPath("static/");
@@ -71,24 +70,15 @@ loader.load( "export_aquarium_01.glb", function ( gltf ) {
 		}
 	});
 	mesh.position.set(0, 0, -1);
-	mesh.scale.set(20, 20, 20);
+	mesh.scale.set(1, 1, 1);
 	scene.add(mesh);
-
-
-	// obj = gltf;
-
-	// gltf.scene.rotation.set(0, 0, 0);
-	// gltf.scene.position.set(0, 0, 0);  
-
-	// scene.add( gltf.scene );
-
 	// animate(gltf);
 }, undefined, function ( error ) {
 	console.error( error );
 } );
 
 
-camera.position.set(4, 40, 150);
+camera.position.set(6, 6, 15);
 // camera.position.set(0, 0, 0);
 camera.lookAt(0, 0, 0);
 
@@ -96,6 +86,7 @@ function animate() {
 	
 	// camera.position.x += 0.01;
 	// camera.position.y += 0.01;
+	// camera.position.z += 0.01;
 	// camera.rotation.z += 0.001;
 	// camera.rotation.y += 0.001;
 	// camera.rotation.y += 0.001;
