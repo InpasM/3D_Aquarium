@@ -75,47 +75,33 @@ scene.add( ambient );
 
 const loader = new GLTFLoader().setPath("static/");
 
-var obj1;
+let model;
 
-loader.load( "export_aquarium_01.glb", function ( gltf ) {
-	const mesh = gltf.scene;
+new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
+	model = loaded.scene;
 
-	mesh.traverse((child) => {
-		if (child.isMesh) {
-			child.castShadow = true;
-			child.receiveShadow = true;
-		}
-	});
-	mesh.position.set(0, 0, -1);
-	mesh.scale.set(1, 1, 1);
-	scene.add(mesh);
-	animate(gltf);
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+	scene.add(model);
+});
 
 
 camera.position.set(10, 0, 0);
 camera.lookAt(0, 0, 0);
 
 function animate() {
-	
-	// camera.position.x += 0.01;
-	// camera.position.y += 0.01;
-	// camera.position.z += 0.01;
-	// camera.rotation.z += 0.001;
-	// camera.rotation.x += 0.001;
-	// camera.rotation.y += 0.001;
-	// console.log("animate");
+
 	if (lastKey) {
 		if (lastKey == 87) {
-			cylinder.position.x -= 0.1;
+			// cylinder.position.x -= 0.1;
+			model.translateX(-0.01);
 		} else if (lastKey == 83) {
-			cylinder.position.x += 0.1;
+			// cylinder.position.x += 0.1;
+			model.translateX(0.01);
 		} else if (lastKey == 65) {
-			cylinder.position.z += 0.1;
+			// cylinder.position.z += 0.1;
+			model.translateZ(0.01);
 		} else if (lastKey == 68) {
-			cylinder.position.z -= 0.1;
+			// cylinder.position.z -= 0.1;
+			model.translateZ(-0.01);
 		}
 	}
 	renderer.render( scene, camera );
