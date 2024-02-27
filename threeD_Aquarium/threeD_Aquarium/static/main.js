@@ -19,6 +19,18 @@ const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 const cube = new THREE.Mesh( geometry, material );
 // scene.add( cube );
 
+const geo = new THREE.CylinderGeometry(2, 2, 4, 64);
+
+const matCylinder = new THREE.MeshStandardMaterial({
+	color: 0xe9b96e,
+	side: THREE.DoubleSide,
+	roughness: 0.7,
+	metalness: 0.65
+});
+const cylinder = new THREE.Mesh(geo, matCylinder);
+scene.add(cylinder);
+
+
 const ground = new THREE.PlaneGeometry(400, 400, 32, 32);
 ground.rotateX(-Math.PI / 2);
 const groundMaterial = new THREE.MeshStandardMaterial({
@@ -28,7 +40,9 @@ const groundMaterial = new THREE.MeshStandardMaterial({
 const groundMesh = new THREE.Mesh(ground, groundMaterial);
 groundMesh.castShadow = false;
 groundMesh.receiveShadow = true;
-scene.add(groundMesh);
+// scene.add(groundMesh);
+
+
 
 
 // const light = new THREE.DirectionalLight(0xffffff, 2);
@@ -60,6 +74,9 @@ scene.add( ambient );
 // renderer.render(scene, camera);
 
 const loader = new GLTFLoader().setPath("static/");
+
+var obj1;
+
 loader.load( "export_aquarium_01.glb", function ( gltf ) {
 	const mesh = gltf.scene;
 
@@ -72,14 +89,13 @@ loader.load( "export_aquarium_01.glb", function ( gltf ) {
 	mesh.position.set(0, 0, -1);
 	mesh.scale.set(1, 1, 1);
 	scene.add(mesh);
-	// animate(gltf);
+	animate(gltf);
 }, undefined, function ( error ) {
 	console.error( error );
 } );
 
 
-camera.position.set(6, 6, 15);
-// camera.position.set(0, 0, 0);
+camera.position.set(10, 0, 0);
 camera.lookAt(0, 0, 0);
 
 function animate() {
@@ -88,11 +104,30 @@ function animate() {
 	// camera.position.y += 0.01;
 	// camera.position.z += 0.01;
 	// camera.rotation.z += 0.001;
+	// camera.rotation.x += 0.001;
 	// camera.rotation.y += 0.001;
-	// camera.rotation.y += 0.001;
-	
+	// console.log("animate");
+	if (lastKey) {
+		if (lastKey == 87) {
+			cylinder.position.x -= 0.1;
+		} else if (lastKey == 83) {
+			cylinder.position.x += 0.1;
+		} else if (lastKey == 65) {
+			cylinder.position.z += 0.1;
+		} else if (lastKey == 68) {
+			cylinder.position.z -= 0.1;
+		}
+	}
 	renderer.render( scene, camera );
 	requestAnimationFrame( animate );
 }
 
 animate();
+
+var lastKey = 0;
+document.addEventListener("keydown", function(e) {
+
+	lastKey = e.keyCode;
+
+	console.log(cylinder.position.z);
+});
