@@ -42,9 +42,6 @@ groundMesh.castShadow = false;
 groundMesh.receiveShadow = true;
 // scene.add(groundMesh);
 
-
-
-
 // const light = new THREE.DirectionalLight(0xffffff, 2);
 // light.position.set(100, 100, 500).normalize();
 // scene.add(light);
@@ -59,7 +56,6 @@ spotLight.angle = Math.PI / 6;
 spotLight.penumbra = 1;
 spotLight.decay = 2;
 spotLight.distance = 100;
-// spotLight.map = textures[ 'disturb.jpg' ];
 
 spotLight.castShadow = true;
 spotLight.shadow.mapSize.width = 1024;
@@ -73,8 +69,6 @@ const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.5 );
 scene.add( ambient );
 // renderer.render(scene, camera);
 
-const loader = new GLTFLoader().setPath("static/");
-
 let model;
 
 new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
@@ -83,37 +77,65 @@ new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
 	scene.add(model);
 });
 
-
 camera.position.set(10, 0, 0);
 camera.lookAt(0, 0, 0);
 
+var movement = {
+	N: false,
+	S: false,
+	W: false,
+	E: false,
+}
+
 function animate() {
 
-	if (lastKey) {
-		if (lastKey == 87) {
-			// cylinder.position.x -= 0.1;
-			model.translateX(-0.01);
-		} else if (lastKey == 83) {
-			// cylinder.position.x += 0.1;
-			model.translateX(0.01);
-		} else if (lastKey == 65) {
-			// cylinder.position.z += 0.1;
-			model.translateZ(0.01);
-		} else if (lastKey == 68) {
-			// cylinder.position.z -= 0.1;
-			model.translateZ(-0.01);
-		}
+	if (movement.N) {
+		// cylinder.position.x -= 0.1;
+		model.translateX(-0.01);
+	}
+	if (movement.S) {
+		// cylinder.position.x += 0.1;
+		model.translateX(0.01);
+	}
+	if (movement.W) {
+		// cylinder.position.z += 0.1;
+		model.translateZ(0.01);
+	}
+	if (movement.E) {
+		// cylinder.position.z -= 0.1;
+		model.translateZ(-0.01);
 	}
 	renderer.render( scene, camera );
 	requestAnimationFrame( animate );
 }
 
+document.body.style.cursor = "none";
 animate();
 
-var lastKey = 0;
 document.addEventListener("keydown", function(e) {
+	const lastKey = e.keyCode;
 
-	lastKey = e.keyCode;
+		if (lastKey == 87) {
+			movement.N = true;
+		} else if (lastKey == 83) {
+			movement.S = true;
+		} else if (lastKey == 65) {
+			movement.W = true;
+		} else if (lastKey == 68) {
+			movement.E = true;
+		}
+});
 
-	console.log(cylinder.position.z);
+document.addEventListener("keyup", function(e) {
+	const lastKey = e.keyCode;
+
+	if (lastKey == 87) {
+		movement.N = false;
+	} else if (lastKey == 83) {
+		movement.S = false;
+	} else if (lastKey == 65) {
+		movement.W = false;
+	} else if (lastKey == 68) {
+		movement.E = false;
+	}
 });
