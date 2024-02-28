@@ -4,8 +4,15 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const appli = document.querySelector('#app');
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 100 );
+const camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 200 );
+var cameraPos = new THREE.Vector3(0, 10, 0);
+camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
+camera.lookAt(0, 0, 0);
+
 const renderer = new THREE.WebGLRenderer();
+
+const mapWidth = 10;
+const mapLength = 20;
 
 function initScene() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -15,9 +22,38 @@ function initScene() {
 	appli.appendChild( renderer.domElement );
 }
 
+const N = 0, E = 1, S = 2, W = 3;
+let meshPlane;
+let mapBorder = [];
+function initMap() {
+	const geoPlane = new THREE.PlaneGeometry(mapWidth, 1);
+	const matPlane = new THREE.MeshStandardMaterial({
+		color: 0xe2b96e,
+		side: THREE.DoubleSide,
+		roughness: 0.7,
+		metalness: 0.65
+	});
+
+	for (var i = 0; i < 4; i++) {
+		mapBorder.push(new THREE.Mesh(geoPlane, matPlane));
+		mapBorder[i].castShadow = true;
+		mapBorder[i].rotateY(Math.PI / 2);
+		scene.add(mapBorder[i]);
+	}
+	mapBorder[N].position.set(mapWidth, 0, 4);
+
+
+	// meshPlane = new THREE.Mesh(geoPlane, matPlane);
+	// meshPlane.rotateY(Math.PI / 2);
+	// meshPlane.position.set(mapWidth, 0, 0);
+	// scene.add(meshPlane);
+}
+
 let aquarium;
 let cube;
-function initObject() {
+function initObjects() {
+	initMap();
+
 	const geometry = new THREE.BoxGeometry( 0.1, 0.4, 1 );
 	const matBox = new THREE.MeshStandardMaterial({
 		color: 0xe9b96e,
@@ -26,10 +62,10 @@ function initObject() {
 		metalness: 0.65
 	});
 	cube = new THREE.Mesh(geometry, matBox);
-	cube.position.set(0, 0.3, 0);
+	// cube.position.set(0, 0.3, 0);
 	cube.castShadow = true;
 	scene.add(cube);
-	
+
 	// const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
 	// const matCylinder = new THREE.MeshStandardMaterial({
 	// 	color: 0xe9b96e,
@@ -71,9 +107,10 @@ function initLights() {
 	// spotLight.position.set(0, 25, 0);
 	// scene.add(spotLight);
 	
-	const spotLight = new THREE.SpotLight(0xffffff, 100);
-	spotLight.position.set(2.5, 6, 8.5);
-	spotLight.angle = Math.PI / 6;
+	const spotLight = new THREE.SpotLight(0xffffff, 200);
+	spotLight.position.set(0, 10, 0);
+	// spotLight.position.set(2.5, 10, 8.5);
+	// spotLight.angle = Math.PI / 6;
 	spotLight.penumbra = 1;
 	spotLight.decay = 2;
 	spotLight.distance = 100;
@@ -90,9 +127,7 @@ function initLights() {
 	scene.add(ambient);
 }
 
-var cameraPos = new THREE.Vector3(10, 4, 0);
-camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
-camera.lookAt(0, 0, 0);
+
 
 var movement = {
 	N: false,
@@ -138,11 +173,19 @@ function moveBox() {
 	// }
 }
 
+function updateBox() {
+
+	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
+	let posZ = (mousePos[0] / window.innerWidth * 8) - 4;
+	cube.position.set(0, 0.3, -posZ);
+}
+
 function animate() {
 
 	moveObject(aquarium);
 	// moveBox();
 	// updateCamera();
+	updateBox();
 	renderer.render( scene, camera );
 	requestAnimationFrame( animate );
 }
@@ -232,7 +275,7 @@ function startGame() {
 
 // document.body.style.cursor = "none";
 initScene();
-initObject();
+initObjects();
 initGround();
 initLights();
 animate();
