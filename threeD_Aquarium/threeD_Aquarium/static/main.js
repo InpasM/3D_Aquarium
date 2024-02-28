@@ -15,20 +15,34 @@ function initScene() {
 	appli.appendChild( renderer.domElement );
 }
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
+let aquarium;
+function initObject() {
+	const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+	const matBox = new THREE.MeshStandardMaterial({
+		color: 0xe9b96e,
+		side: THREE.DoubleSide,
+		roughness: 0.7,
+		metalness: 0.65
+	});
+	const cube = new THREE.Mesh(geometry, matBox);
+	scene.add(cube);
+	
+	// const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
+	// const matCylinder = new THREE.MeshStandardMaterial({
+	// 	color: 0xe9b96e,
+	// 	side: THREE.DoubleSide,
+	// 	roughness: 0.7,
+	// 	metalness: 0.65
+	// });
+	// const cylinder = new THREE.Mesh(geoCylinder, matCylinder);
+	// scene.add(cylinder);
 
-const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
-const matCylinder = new THREE.MeshStandardMaterial({
-	color: 0xe9b96e,
-	side: THREE.DoubleSide,
-	roughness: 0.7,
-	metalness: 0.65
-});
-const cylinder = new THREE.Mesh(geoCylinder, matCylinder);
-scene.add(cylinder);
+	// new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
+	// 	aquarium = loaded.scene;
+	// 	scene.add(aquarium);
+	// });
+}
+
 
 function initGround() {
 	const ground = new THREE.PlaneGeometry(400, 400, 32, 32);
@@ -71,13 +85,6 @@ function initLights() {
 	const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.5 );
 	scene.add(ambient);
 }
-
-let aquarium;
-
-new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
-	aquarium = loaded.scene;
-	scene.add(aquarium);
-});
 
 camera.position.set(10, 0, 0);
 camera.lookAt(0, 0, 0);
@@ -139,7 +146,47 @@ document.addEventListener("keyup", function(e) {
 	}
 });
 
+document.addEventListener("wheel", function(e) {
+	if (e.deltaY > 0) {
+		camera.translateZ(0.25);
+	} else {
+		camera.translateZ(-0.25);
+	}
+});
+
+const mousePosX = document.querySelector(".mouse-pos-x");
+const mousePosY = document.querySelector(".mouse-pos-y");
+const mouseSide = document.querySelector(".mouse-side");
+
+const TOPLEFT = 0, TOPRIGHT = 1, BOTTOMLEFT = 2, BOTTOMRIGHT = 3;
+function whichSide(posX, posY) {
+	const midHeight = window.innerHeight / 2;
+	const midWidth = window.innerWidth / 2;
+
+	if (posX <= midWidth && posY <= midHeight)
+		return TOPLEFT;
+	else if (posX > midWidth && posY <= midHeight)
+		return TOPRIGHT;
+	else if (posX <= midWidth && posY > midHeight)
+		return BOTTOMLEFT;
+	else if (posX > midWidth && posY > midHeight)
+		return BOTTOMRIGHT;
+}
+
+var windowWidth = window.innerWidth;
+var windowHeight = window.innerHeight;
+document.addEventListener("mousemove", function(e) {
+
+	mousePosX.innerText = "x: " + e.clientX + " / " + windowWidth;
+	mousePosY.innerText = "y: " + e.clientY + " / " + windowHeight;
+	mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
+
+
+});
+
 document.body.style.cursor = "none";
 initScene();
+initObject();
+initGround();
 initLights();
 animate();
