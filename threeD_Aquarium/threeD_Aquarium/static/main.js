@@ -72,12 +72,11 @@ function initLights() {
 	scene.add(ambient);
 }
 
-let model;
+let aquarium;
 
 new GLTFLoader().setPath("static/").load('export_aquarium_01.glb', (loaded) => {
-	model = loaded.scene;
-
-	scene.add(model);
+	aquarium = loaded.scene;
+	scene.add(aquarium);
 });
 
 camera.position.set(10, 0, 0);
@@ -90,32 +89,27 @@ var movement = {
 	E: false,
 }
 
-function animate() {
-
+function moveObject(obj) {
 	if (movement.N) {
-		// cylinder.position.x -= 0.1;
-		model.translateX(-0.01);
+		obj.translateX(-0.01);
 	}
 	if (movement.S) {
-		// cylinder.position.x += 0.1;
-		model.translateX(0.01);
+		obj.translateX(0.01);
 	}
 	if (movement.W) {
-		// cylinder.position.z += 0.1;
-		model.translateZ(0.01);
+		obj.translateZ(0.01);
 	}
 	if (movement.E) {
-		// cylinder.position.z -= 0.1;
-		model.translateZ(-0.01);
+		obj.translateZ(-0.01);
 	}
+}
+
+function animate() {
+
+	moveObject(aquarium);
 	renderer.render( scene, camera );
 	requestAnimationFrame( animate );
 }
-
-document.body.style.cursor = "none";
-initScene();
-initLights();
-animate();
 
 document.addEventListener("keydown", function(e) {
 	const lastKey = e.keyCode;
@@ -144,3 +138,8 @@ document.addEventListener("keyup", function(e) {
 		movement.E = false;
 	}
 });
+
+document.body.style.cursor = "none";
+initScene();
+initLights();
+animate();
