@@ -187,7 +187,7 @@ const borderOffset = wallWidth * 2;
 function updateBox() {
 
 	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
-	let posZ = (mousePos[0] / window.innerWidth * 8) - 4;
+	let posZ = (mousePos[0] / (window.innerWidth - marginBox) * 8) - 4;
 	// cube.position.set(0, 0.3, -posZ);
 	if (!startup) {
 		cube.position.set(posZ, 0.3, mapCenter.length - borderOffset);
@@ -275,6 +275,7 @@ document.addEventListener("click", startGame);
 var mouseStartPos = [0, 0];
 var mousePos = [0, 0];
 var startup = true;
+const precisionLeaving = 200;
 
 function startGame() {
 	document.removeEventListener("click", startGame);
@@ -292,24 +293,19 @@ function startGame() {
 		mousePos = [fixPosX, fixPosY];
 		mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
 		mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
-		// mousePosX.innerText = "x: " + e.clientX + " / " + mouseStartPos[0];
-		// mousePosY.innerText = "y: " + e.clientY + " / " + mouseStartPos[1];
 		// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
 	});
+	elements.mouseBox.addEventListener("mouseleave", function(e) {
+		// console.log("leaving x:", mousePos[0], "y:", mousePos[1]);
+		const mouseBoxWidth = window.innerWidth - marginBox;
+		let midWidth = mouseBoxWidth / 2;
 
-	// document.addEventListener("mousemove", function(e) {
-	// 	if (startup) {
-	// 		mouseStartPos = [e.clientX, e.clientY];
-	// 		startup = false;
-	// 	}
-	// 	// if (mouseDown) {
-
-	// 	// }
-	// 	mousePos = [e.clientX, e.clientY];
-	// 	mousePosX.innerText = "x: " + e.clientX + " / " + mouseStartPos[0];
-	// 	mousePosY.innerText = "y: " + e.clientY + " / " + mouseStartPos[1];
-	// 	// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
-	// });
+		if (mousePos[0] >= midWidth && mousePos[0] > mouseBoxWidth - precisionLeaving) {
+			mousePos[0] = window.innerWidth - marginBox;
+		}
+		else if (mousePos[0] < precisionLeaving)
+			mousePos[0] = 0;
+	});
 }
 
 const marginBox = 80;
