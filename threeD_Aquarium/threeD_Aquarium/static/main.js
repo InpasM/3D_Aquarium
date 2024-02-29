@@ -57,11 +57,12 @@ function initMap() {
 let aquarium;
 let cube, sphere;
 const sphereRadius = 0.4;
-const paddleWidth = 0.3;
+const paddleLength = 0.3;
+const paddleWidth = mapWidth * 0.2;
 function initObjects() {
 	initMap();
 
-	const geometry = new THREE.BoxGeometry( mapWidth * 0.2, 0.5, paddleWidth);
+	const geometry = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
 	const matBox = new THREE.MeshStandardMaterial({
 		color: 0xfcba03,
 		side: THREE.DoubleSide,
@@ -191,7 +192,7 @@ function moveBox() {
 	// }
 }
 
-const marginPaddle = paddleWidth * 2;
+const marginPaddle = paddleLength * 2;
 function updateBox() {
 
 	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
@@ -288,27 +289,31 @@ function updateAngle() {
 }
 
 let sphereAngle = 90;
-let sphereSpeed = 0.05;
+let sphereSpeed = 0.1;
 function moveSphere() {
-
 	if (gameStart) {
 		const angleRadian = (sphereAngle * Math.PI) / 180.0
-	
 		var deltaX = sphereSpeed * Math.cos(angleRadian);
 		var deltaZ = sphereSpeed * Math.sin(angleRadian);
 	
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
-	
+		if (sphere.position.z >= mapCenter.length - sphereRadius - (marginPaddle + paddleLength / 2)) {
+			const halfWidth = paddleWidth / 2;
+
+			if (sphere.position.x >= cube.position.x - halfWidth && sphere.position.x <= cube.position.x + halfWidth) {
+				sphereAngle = updateAngle();
+				return;
+			}
+		}
 		if (sphere.position.z >= mapCenter.length - sphereRadius) {
 			console.log("out map bottom");
-			sphereAngle = updateAngle();
+			gameStart = false;
 		}
 		else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
 			console.log("out map top");
 			sphereAngle = updateAngle();
 		}
-		console.log(sphere.position.z);
 	}
 }
 
