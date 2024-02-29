@@ -3,16 +3,16 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const appli = document.querySelector('#app');
 
+const mapWidth = 10;
+const mapLength = 14;
+const mapCenter = {width: mapWidth / 2, length: mapLength / 2};
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 200 );
-var cameraPos = new THREE.Vector3(0, 10, 0);
+const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 1, 200);
+var cameraPos = new THREE.Vector3(0, 30, 0);
 camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
-
-const mapWidth = 10;
-const mapLength = 20;
 
 function initScene() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -23,10 +23,12 @@ function initScene() {
 }
 
 const N = 0, E = 1, S = 2, W = 3;
+const wallWidth = 0.2;
 let meshPlane;
 let mapBorder = [];
 function initMap() {
-	const geoPlane = new THREE.PlaneGeometry(mapWidth, 1);
+	const geoBoxSide = new THREE.BoxGeometry(mapLength, 1, wallWidth);
+	const geoBoxEnd = new THREE.BoxGeometry(mapWidth, 1, wallWidth);
 	const matPlane = new THREE.MeshStandardMaterial({
 		color: 0xe2b96e,
 		side: THREE.DoubleSide,
@@ -35,13 +37,20 @@ function initMap() {
 	});
 
 	for (var i = 0; i < 4; i++) {
-		mapBorder.push(new THREE.Mesh(geoPlane, matPlane));
+		if (i % 2) {
+			mapBorder.push(new THREE.Mesh(geoBoxSide, matPlane));
+			mapBorder[i].rotateY(Math.PI / 2);
+		}
+		else {
+			mapBorder.push(new THREE.Mesh(geoBoxEnd, matPlane));
+		}
 		mapBorder[i].castShadow = true;
-		mapBorder[i].rotateY(Math.PI / 2);
 		scene.add(mapBorder[i]);
 	}
-	mapBorder[N].position.set(mapWidth, 0, 4);
-
+	mapBorder[N].position.set(0, 0, -mapCenter.length - wallWidth / 2);
+	mapBorder[E].position.set(mapCenter.width + wallWidth / 2, 0, 0);
+	mapBorder[S].position.set(0, 0, mapCenter.length + wallWidth / 2);
+	mapBorder[W].position.set(-mapCenter.width - wallWidth / 2, 0, 0);
 
 	// meshPlane = new THREE.Mesh(geoPlane, matPlane);
 	// meshPlane.rotateY(Math.PI / 2);
@@ -54,7 +63,7 @@ let cube;
 function initObjects() {
 	initMap();
 
-	const geometry = new THREE.BoxGeometry( 0.1, 0.4, 1 );
+	const geometry = new THREE.BoxGeometry( 0.1, 0.4, 0.1 );
 	const matBox = new THREE.MeshStandardMaterial({
 		color: 0xe9b96e,
 		side: THREE.DoubleSide,
@@ -107,7 +116,7 @@ function initLights() {
 	// spotLight.position.set(0, 25, 0);
 	// scene.add(spotLight);
 	
-	const spotLight = new THREE.SpotLight(0xffffff, 200);
+	const spotLight = new THREE.SpotLight(0xffffff, 300);
 	spotLight.position.set(0, 10, 0);
 	// spotLight.position.set(2.5, 10, 8.5);
 	// spotLight.angle = Math.PI / 6;
@@ -116,8 +125,8 @@ function initLights() {
 	spotLight.distance = 100;
 	
 	spotLight.castShadow = true;
-	spotLight.shadow.mapSize.width = 1024;
-	spotLight.shadow.mapSize.height = 1024;
+	// spotLight.shadow.mapSize.width = 1024;
+	// spotLight.shadow.mapSize.height = 1024;
 	spotLight.shadow.camera.near = 1;
 	spotLight.shadow.camera.far = 100;
 	spotLight.shadow.focus = 1;
@@ -177,7 +186,10 @@ function updateBox() {
 
 	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
 	let posZ = (mousePos[0] / window.innerWidth * 8) - 4;
-	cube.position.set(0, 0.3, -posZ);
+	// cube.position.set(0, 0.3, -posZ);
+	// if (!startup) {
+		cube.position.set(mapWidth / 2, 0.3, 0);
+	// }
 }
 
 function animate() {
