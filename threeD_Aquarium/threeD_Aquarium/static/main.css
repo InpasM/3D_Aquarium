@@ -22,7 +22,7 @@ body {
 .mouseBox {
 	position: absolute;
 	/* z-index: 10; */
-	background-color: rgba(255, 21, 21, 0.089);
+	/* background-color: rgba(255, 21, 21, 0.089); */
 	/* width: 90vw;
 	height: 90vh; */
 }

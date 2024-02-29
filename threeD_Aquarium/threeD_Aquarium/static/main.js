@@ -24,7 +24,6 @@ function initScene() {
 
 const N = 0, E = 1, S = 2, W = 3;
 const wallWidth = 0.2;
-let meshPlane;
 let mapBorder = [];
 function initMap() {
 	const geoBoxSide = new THREE.BoxGeometry(mapLength, 1, wallWidth);
@@ -53,30 +52,39 @@ function initMap() {
 	mapBorder[E].position.set(mapCenter.width + wallWidth / 2, 0, 0);
 	mapBorder[S].position.set(0, 0, mapCenter.length + wallWidth / 2);
 	mapBorder[W].position.set(-mapCenter.width - wallWidth / 2, 0, 0);
-
-	// meshPlane = new THREE.Mesh(geoPlane, matPlane);
-	// meshPlane.rotateY(Math.PI / 2);
-	// meshPlane.position.set(mapWidth, 0, 0);
-	// scene.add(meshPlane);
 }
 
 let aquarium;
-let cube;
+let cube, sphere;
+const sphereRadius = 0.4;
+const paddleWidth = 0.3;
 function initObjects() {
 	initMap();
 
-	const geometry = new THREE.BoxGeometry( mapWidth * 0.2, 0.4, 0.2 );
+	const geometry = new THREE.BoxGeometry( mapWidth * 0.2, 0.5, paddleWidth);
 	const matBox = new THREE.MeshStandardMaterial({
-		color: 0xe9b96e,
+		color: 0xfcba03,
 		side: THREE.DoubleSide,
 		roughness: 0.7,
 		metalness: 0.65
 	});
 	cube = new THREE.Mesh(geometry, matBox);
 	// cube.position.set(0, 0.3, 0);
-	cube.position.set(0, 0.3, mapCenter.length - borderOffset);
+	cube.position.set(0, 0.3, mapCenter.length - marginPaddle);
 	cube.castShadow = true;
 	scene.add(cube);
+
+	const geoSphere = new THREE.SphereGeometry(sphereRadius, 16, 8);
+	const matSphere = new THREE.MeshStandardMaterial({
+		color: 0xfcba03,
+		side: THREE.DoubleSide,
+		// roughness: 0.7,
+		// metalness: 0.65
+	});
+	sphere = new THREE.Mesh(geoSphere, matSphere);
+	sphere.position.set(0, 0.3, marginPaddle);
+	sphere.castShadow = true;
+	scene.add(sphere);
 
 	// const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
 	// const matCylinder = new THREE.MeshStandardMaterial({
@@ -183,14 +191,14 @@ function moveBox() {
 	// }
 }
 
-const borderOffset = wallWidth * 2;
+const marginPaddle = paddleWidth * 2;
 function updateBox() {
 
 	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
 	let posZ = (mousePos[0] / (window.innerWidth - marginBox) * 8) - 4;
 	// cube.position.set(0, 0.3, -posZ);
-	if (!startup) {
-		cube.position.set(posZ, 0.3, mapCenter.length - borderOffset);
+	if (gameStart) {
+		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
 	}
 }
 
@@ -199,6 +207,7 @@ function animate() {
 	moveObject(aquarium);
 	// moveBox();
 	// updateCamera();
+	moveSphere();
 	updateBox();
 	renderer.render( scene, camera );
 	requestAnimationFrame( animate );
@@ -270,23 +279,60 @@ function rotateCamera() {
 	console.log("rotate camera");
 }
 
+function updateAngle() {
+	let newAngle = sphereAngle + 180;
+
+	if (newAngle > 360)
+		newAngle -= 360;
+	return newAngle;
+}
+
+let sphereAngle = 90;
+let sphereSpeed = 0.05;
+function moveSphere() {
+
+	if (gameStart) {
+		const angleRadian = (sphereAngle * Math.PI) / 180.0
+	
+		var deltaX = sphereSpeed * Math.cos(angleRadian);
+		var deltaZ = sphereSpeed * Math.sin(angleRadian);
+	
+		sphere.translateX(deltaX);
+		sphere.translateZ(deltaZ);
+	
+		if (sphere.position.z >= mapCenter.length - sphereRadius) {
+			console.log("out map bottom");
+			sphereAngle = updateAngle();
+		}
+		else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
+			console.log("out map top");
+			sphereAngle = updateAngle();
+		}
+		console.log(sphere.position.z);
+	}
+}
+
 document.addEventListener("click", startGame);
 
 var mouseStartPos = [0, 0];
 var mousePos = [0, 0];
-var startup = true;
+var firstStart = true;
+var gameStart = false;
 const precisionLeaving = 200;
 
 function startGame() {
+	gameStart = true;
 	document.removeEventListener("click", startGame);
 	document.addEventListener("mousedown", function(e) {
 		mouseDown = true;
 	});
 
+	// moveSphere(1);
+
 	elements.mouseBox.addEventListener("mousemove", function(e) {
-		if (startup) {
+		if (firstStart) {
 			mouseStartPos = [e.clientX - marginBox / 2, e.clientY - marginBox / 2];
-			startup = false;
+			firstStart = false;
 		}
 		const fixPosX = e.clientX - marginBox / 2;
 		const fixPosY = e.clientY - marginBox / 2;
