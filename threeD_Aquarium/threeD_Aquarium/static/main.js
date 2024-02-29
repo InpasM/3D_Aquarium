@@ -281,14 +281,18 @@ function rotateCamera() {
 }
 
 function updateAngle() {
-	let newAngle = sphereAngle + 180;
+	// let newAngle = sphereAngle + 180;
+	// let newAngle = sphereAngle * 2 - (sphereAngle - 180);
+	let newAngle = sphereAngle * 2 - (sphereIncidenceAngle - 180);
 
 	if (newAngle > 360)
 		newAngle -= 360;
 	return newAngle;
 }
 
-let sphereAngle = 90;
+// let sphereAngle = 90;
+let sphereAngle = 95;
+let sphereIncidenceAngle = 85;
 let sphereSpeed = 0.1;
 function moveSphere() {
 	if (gameStart) {
@@ -308,7 +312,9 @@ function moveSphere() {
 		}
 		if (sphere.position.z >= mapCenter.length - sphereRadius) {
 			console.log("out map bottom");
-			gameStart = false;
+			// gameStart = false;
+
+			sphereAngle = updateAngle();
 		}
 		else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
 			console.log("out map top");
