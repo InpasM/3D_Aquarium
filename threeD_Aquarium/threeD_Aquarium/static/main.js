@@ -28,9 +28,11 @@ let meshPlane;
 let mapBorder = [];
 function initMap() {
 	const geoBoxSide = new THREE.BoxGeometry(mapLength, 1, wallWidth);
-	const geoBoxEnd = new THREE.BoxGeometry(mapWidth, 1, wallWidth);
+	const geoBoxEnd = new THREE.BoxGeometry(mapWidth + wallWidth * 2, 1, wallWidth);
 	const matPlane = new THREE.MeshStandardMaterial({
-		color: 0xe2b96e,
+		// color: 0xe2b96e,
+		// color: 0x00BABC,
+		color: 0x4287f5,
 		side: THREE.DoubleSide,
 		roughness: 0.7,
 		metalness: 0.65
@@ -63,7 +65,7 @@ let cube;
 function initObjects() {
 	initMap();
 
-	const geometry = new THREE.BoxGeometry( 0.1, 0.4, 0.1 );
+	const geometry = new THREE.BoxGeometry( mapWidth * 0.2, 0.4, 0.2 );
 	const matBox = new THREE.MeshStandardMaterial({
 		color: 0xe9b96e,
 		side: THREE.DoubleSide,
@@ -72,6 +74,7 @@ function initObjects() {
 	});
 	cube = new THREE.Mesh(geometry, matBox);
 	// cube.position.set(0, 0.3, 0);
+	cube.position.set(0, 0.3, mapCenter.length - borderOffset);
 	cube.castShadow = true;
 	scene.add(cube);
 
@@ -97,7 +100,7 @@ function initGround() {
 
 	ground.rotateX(-Math.PI / 2);
 	const groundMaterial = new THREE.MeshStandardMaterial({
-		color: 0x555555,
+		color: 0x303030,
 		side: THREE.DoubleSide
 	});
 	const groundMesh = new THREE.Mesh(ground, groundMaterial);
@@ -135,8 +138,6 @@ function initLights() {
 	const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.5 );
 	scene.add(ambient);
 }
-
-
 
 var movement = {
 	N: false,
@@ -182,14 +183,15 @@ function moveBox() {
 	// }
 }
 
+const borderOffset = wallWidth * 2;
 function updateBox() {
 
 	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
 	let posZ = (mousePos[0] / window.innerWidth * 8) - 4;
 	// cube.position.set(0, 0.3, -posZ);
-	// if (!startup) {
-		cube.position.set(mapWidth / 2, 0.3, 0);
-	// }
+	if (!startup) {
+		cube.position.set(posZ, 0.3, mapCenter.length - borderOffset);
+	}
 }
 
 function animate() {
@@ -263,27 +265,92 @@ function whichSide(posX, posY) {
 		return BOTTOMRIGHT;
 }
 
+let mouseDown = false;
+function rotateCamera() {
+	console.log("rotate camera");
+}
+
 document.addEventListener("click", startGame);
 
 var mouseStartPos = [0, 0];
 var mousePos = [0, 0];
 var startup = true;
+
 function startGame() {
 	document.removeEventListener("click", startGame);
-	var windowWidth = window.innerWidth;
-	var windowHeight = window.innerHeight;
+	document.addEventListener("mousedown", function(e) {
+		mouseDown = true;
+	});
 
-	document.addEventListener("mousemove", function(e) {
+	elements.mouseBox.addEventListener("mousemove", function(e) {
 		if (startup) {
-			mouseStartPos = [e.clientX, e.clientY];
+			mouseStartPos = [e.clientX - marginBox / 2, e.clientY - marginBox / 2];
 			startup = false;
 		}
-		mousePos = [e.clientX, e.clientY];
-		mousePosX.innerText = "x: " + e.clientX + " / " + mouseStartPos[0];
-		mousePosY.innerText = "y: " + e.clientY + " / " + mouseStartPos[1];
+		const fixPosX = e.clientX - marginBox / 2;
+		const fixPosY = e.clientY - marginBox / 2;
+		mousePos = [fixPosX, fixPosY];
+		mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
+		mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
+		// mousePosX.innerText = "x: " + e.clientX + " / " + mouseStartPos[0];
+		// mousePosY.innerText = "y: " + e.clientY + " / " + mouseStartPos[1];
 		// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
 	});
+
+	// document.addEventListener("mousemove", function(e) {
+	// 	if (startup) {
+	// 		mouseStartPos = [e.clientX, e.clientY];
+	// 		startup = false;
+	// 	}
+	// 	// if (mouseDown) {
+
+	// 	// }
+	// 	mousePos = [e.clientX, e.clientY];
+	// 	mousePosX.innerText = "x: " + e.clientX + " / " + mouseStartPos[0];
+	// 	mousePosY.innerText = "y: " + e.clientY + " / " + mouseStartPos[1];
+	// 	// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
+	// });
 }
+
+const marginBox = 80;
+function resizeMouseBox(mouseBox) {
+	let sizeWidth = 0, sizeHeight = 0, margin = 0;
+
+	// if (window.innerWidth > 150 && window.innerHeight > 150) {
+		sizeWidth = window.innerWidth - marginBox;
+		sizeHeight = window.innerHeight - marginBox;
+		margin = marginBox / 2;
+	// } else {
+	// 	if (window.innerWidth > window.innerHeight) {
+	// 		margin = window.innerHeight * 0.05;	
+	// 	} else {
+	// 		margin = window.innerWidth * 0.05;
+	// 	}
+	// 	sizeWidth = window.innerWidth - margin * 2;
+	// 	sizeHeight = window.innerHeight - margin * 2;
+	// }
+	mouseBox.style.width = sizeWidth + "px";
+	mouseBox.style.height = sizeHeight + "px";
+	mouseBox.style.left = margin + "px";
+	mouseBox.style.top = margin + "px";
+}
+
+function initPageElement() {
+	let elements = {};
+	elements.mouseBox = document.createElement("div");
+	elements.mouseBox.className = "mouseBox";
+
+	document.body.prepend(elements.mouseBox);
+	resizeMouseBox(elements.mouseBox);
+	window.addEventListener("resize", function(e) {
+		resizeMouseBox(elements.mouseBox);
+	});
+	return elements;
+}
+
+let elements = initPageElement();
+
+console.log(elements);
 
 // document.body.style.cursor = "none";
 initScene();
