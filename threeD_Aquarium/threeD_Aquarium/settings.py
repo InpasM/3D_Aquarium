@@ -119,8 +119,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = "/home/msapin/Documents/3D_Aquarium/threeD_Aquarium/threeD_Aquarium/static"
 
-TEMPLATES_URL = 'templates/'
-TEMPLATES_URL = "/home/msapin/Documents/3D_Aquarium/threeD_Aquarium/threeD_Aquarium/templates"
+# TEMPLATES_URL = 'templates/'
+# TEMPLATES_URL = "/home/msapin/Documents/3D_Aquarium/threeD_Aquarium/threeD_Aquarium/templates"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
