@@ -4,11 +4,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const appli = document.querySelector('#app');
 
 const mapWidth = 10;
-const mapLength = 14;
+const mapLength = 10;
 const mapCenter = {width: mapWidth / 2, length: mapLength / 2};
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 1, 200);
-var cameraPos = new THREE.Vector3(0, 30, 0);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 200);
+var cameraPos = new THREE.Vector3(0, 10, 12);
 camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
 camera.lookAt(0, 0, 0);
 
@@ -280,20 +280,23 @@ function rotateCamera() {
 	console.log("rotate camera");
 }
 
-function updateAngle() {
+const LATERAL = 90;
+const END = 180;
+function updateAngle(side) {
 	// let newAngle = sphereAngle + 180;
 	// let newAngle = sphereAngle * 2 - (sphereAngle - 180);
-	let newAngle = sphereAngle * 2 - (sphereIncidenceAngle - 180);
+	// let newAngle = sphereAngle * 2 - (sphereIncidenceAngle - 180);
+	let newAngle = sphereAngle + (side - sphereAngle) * 2;
 
+	sphereSpeed += 0.01;
 	if (newAngle > 360)
 		newAngle -= 360;
 	return newAngle;
 }
 
-// let sphereAngle = 90;
-let sphereAngle = 95;
-let sphereIncidenceAngle = 85;
+let sphereAngle = 90;
 let sphereSpeed = 0.1;
+
 function moveSphere() {
 	if (gameStart) {
 		const angleRadian = (sphereAngle * Math.PI) / 180.0
@@ -302,23 +305,25 @@ function moveSphere() {
 	
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
-		if (sphere.position.z >= mapCenter.length - sphereRadius - (marginPaddle + paddleLength / 2)) {
+
+		var marginBeforeWall = marginPaddle + paddleLength / 2;
+		if (sphere.position.z >= mapCenter.length - sphereRadius - marginBeforeWall) {
 			const halfWidth = paddleWidth / 2;
 
 			if (sphere.position.x >= cube.position.x - halfWidth && sphere.position.x <= cube.position.x + halfWidth) {
-				sphereAngle = updateAngle();
+
+				sphereAngle = updateAngle(END);
 				return;
 			}
 		}
 		if (sphere.position.z >= mapCenter.length - sphereRadius) {
-			console.log("out map bottom");
-			// gameStart = false;
-
-			sphereAngle = updateAngle();
-		}
-		else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
-			console.log("out map top");
-			sphereAngle = updateAngle();
+			console.log("LOSER!");
+			gameStart = false;
+		} else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
+			console.log("WIN!");
+			sphereAngle = updateAngle(END);
+		} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
+			sphereAngle = updateAngle(LATERAL);
 		}
 	}
 }
@@ -331,7 +336,7 @@ var firstStart = true;
 var gameStart = false;
 const precisionLeaving = 200;
 
-function startGame() {
+function startGame(e) {
 	gameStart = true;
 	document.removeEventListener("click", startGame);
 	document.addEventListener("mousedown", function(e) {
@@ -339,12 +344,15 @@ function startGame() {
 	});
 
 	// moveSphere(1);
+	if (firstStart) {
+		mouseStartPos = [e.clientX - marginBox / 2, e.clientY - marginBox / 2];
+		const fixPosX = e.clientX - marginBox / 2;
+		const fixPosY = e.clientY - marginBox / 2;
+		mousePos = [fixPosX, fixPosY];
+		firstStart = false;
+	}
 
 	elements.mouseBox.addEventListener("mousemove", function(e) {
-		if (firstStart) {
-			mouseStartPos = [e.clientX - marginBox / 2, e.clientY - marginBox / 2];
-			firstStart = false;
-		}
 		const fixPosX = e.clientX - marginBox / 2;
 		const fixPosY = e.clientY - marginBox / 2;
 		mousePos = [fixPosX, fixPosY];
@@ -402,8 +410,6 @@ function initPageElement() {
 }
 
 let elements = initPageElement();
-
-console.log(elements);
 
 // document.body.style.cursor = "none";
 initScene();
