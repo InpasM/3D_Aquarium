@@ -2,12 +2,33 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const appli = document.querySelector('#app');
+const appli2 = document.querySelector('#app2');
+
+const containerGame = document.querySelector('.container-game');
+containerGame.style.display = "flex";
 
 const mapWidth = 10;
 const mapLength = 10;
 const mapCenter = {width: mapWidth / 2, length: mapLength / 2};
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 200);
+
+let gameWidth = 0;
+// local multi
+const LOCALMULTI = false;
+if (LOCALMULTI) {
+	gameWidth = window.innerWidth / 2;
+
+	const camera2 = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 200);
+	var cameraPos2 = new THREE.Vector3(0, 10, -12);
+	camera2.position.set(cameraPos2.getComponent(0), cameraPos2.getComponent(1), cameraPos2.getComponent(2));
+	camera2.lookAt(0, 0, 0);
+
+	const renderer2 = new THREE.WebGLRenderer();
+} else {
+	gameWidth = window.innerWidth;
+}
+
+const camera = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 200);
 var cameraPos = new THREE.Vector3(0, 10, 12);
 camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
 camera.lookAt(0, 0, 0);
@@ -15,17 +36,32 @@ camera.lookAt(0, 0, 0);
 const renderer = new THREE.WebGLRenderer();
 
 function initScene() {
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	
+	renderer.setSize(gameWidth, window.innerHeight);
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFShadowMap;
-	appli.appendChild( renderer.domElement );
+	appli.appendChild(renderer.domElement);
+	if (LOCALMULTI) {
+		renderer2.setSize(gameWidth, window.innerHeight);
+		renderer2.shadowMap.enabled = true;
+		renderer2.shadowMap.type = THREE.PCFShadowMap;
+		appli2.appendChild(renderer2.domElement);
+	}
 }
 
 window.addEventListener("resize", function() {
-	camera.aspect = window.innerWidth / window.innerHeight;
+	if (LOCALMULTI)
+		gameWidth = window.innerWidth / 2;
+	else 
+		gameWidth = window.innerWidth;
+	camera.aspect = gameWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setSize(gameWidth, window.innerHeight);
+	
+	if (LOCALMULTI) {
+		camera2.aspect = gameWidth / window.innerHeight;
+		camera2.updateProjectionMatrix();
+		renderer2.setSize(gameWidth, window.innerHeight);
+	}
 });
 
 const N = 0, E = 1, S = 2, W = 3;
@@ -186,34 +222,13 @@ function moveObject(obj) {
 	}
 }
 
-// var cameraPos = new THREE.Vector3(10, 10, 0);
-// camera.position.set(cameraPos[0], cameraPos[1], cameraPos[2]);
 function updateCamera() {
 	camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
 }
 
-function moveBox() {
-	let translateZValue = (mouseStartPos[0] - mousePos[0]) / 100;
-
-	if (translateZValue > 1)
-		translateZValue = 1;
-	else if (translateZValue < -1)
-		translateZValue = -1;
-
-	// console.log(translateZValue);
-	
-	// if (cube.position.z < 3.2 && cube.position.z > -3.2) {
-		// console.log(cube.position);
-		cube.translateZ(translateZValue);
-	// }
-}
-
 const marginPaddle = paddleLength * 2;
 function updateBox() {
-
-	// console.log((mousePos[0] / window.innerWidth * 8) - 4);
 	let posZ = (mousePos[0] / (window.innerWidth - marginBox) * 8) - 4;
-	// cube.position.set(0, 0.3, -posZ);
 	if (gameStart) {
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
 	}
@@ -221,18 +236,20 @@ function updateBox() {
 
 function animate() {
 
-	moveObject(aquarium);
-	// moveBox();
-	// updateCamera();
+	// moveObject(aquarium);
 	moveSphere();
 	updateBox();
-	renderer.render( scene, camera );
-	requestAnimationFrame( animate );
+	renderer.render(scene, camera);
+	if (LOCALMULTI) {
+		renderer2.render(scene, camera2);
+	}
+	requestAnimationFrame(animate);
 }
 
 document.addEventListener("keydown", function(e) {
 	const lastKey = e.keyCode;
 
+	console.log(lastKey);
 	if (lastKey == 87) {
 		movement.N = true;
 	} else if (lastKey == 83) {
@@ -301,7 +318,9 @@ const END = 180;
 function updateAngle(side) {
 	let newAngle = sphereAngle + (side - sphereAngle) * 2;
 
-	sphereSpeed += 0.01;
+	if (sphereSpeed < 0.4)
+		sphereSpeed += 0.01;
+	console.log(sphereSpeed);
 	if (newAngle > 360)
 		newAngle -= 360;
 	return newAngle;
@@ -309,6 +328,7 @@ function updateAngle(side) {
 
 let sphereAngle = 90;
 let sphereSpeed = 0.1;
+let goingUp = false;
 
 function moveSphere() {
 	if (gameStart) {
@@ -318,24 +338,14 @@ function moveSphere() {
 	
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
-		// geoSphere.translateX(deltaX);
-		// geoSphere.translateZ(deltaZ);
 
-		// sphere.geometry.boundingSphere().
-		// console.log(sphere.geometry.boundingSphere.intersectBox(cube));
-		
-		// boxCube.copy( cube.geometry.boundingBox ).applyMatrix4( cube.matrixWorld );
-		// console.log(sphere.geometry.boundingSphere.intersect(boxCube));
-		
+		// using bounding box
 		boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
 		boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
-		// console.log(boundingBoxPaddle.intersectBox(boundingBoxSphere));
-		// console.log(boundingBoxPaddle.intersectsBox(boundingBoxSphere));
 
-		if (boundingBoxPaddle.intersectsBox(boundingBoxSphere)) {
-			// sphere.translateX(-deltaX);
-			// sphere.translateZ(-deltaZ);
+		if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
 			sphereAngle = updateAngle(END);
+			goingUp = true;
 		}
 
 		// var marginBeforeWall = marginPaddle + paddleLength / 2;
@@ -351,10 +361,9 @@ function moveSphere() {
 		// }
 		// if (sphere.position.z >= mapCenter.length - sphereRadius) {
 		// 	console.log("LOSER!");
-		// 	// console.log(geoSphere.boundingSphere);
 		// 	gameStart = false;
 		// } else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
-		// 	console.log("WIN!");
+		// 	goingUp = false;
 		// 	sphereAngle = updateAngle(END);
 		// } else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
 		// 	sphereAngle = updateAngle(LATERAL);
@@ -443,7 +452,17 @@ function initPageElement() {
 	return elements;
 }
 
+function updateGame() {
+	// while (gameRunning) {
+
+	// }
+	if (gameRunning) {
+		console.log("game running");
+	}
+}
+
 let elements = initPageElement();
+let gameRunning = true;
 
 // document.body.style.cursor = "none";
 initScene();
@@ -451,3 +470,6 @@ initObjects();
 initGround();
 initLights();
 animate();
+
+setInterval(updateGame, 10);
+updateGame();

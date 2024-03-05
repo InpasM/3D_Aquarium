@@ -5,6 +5,12 @@ body {
 	/* cursor: none; */
 }
 
+.container-game {
+	display: flex;
+	justify-content: space-between;
+	flex-direction: row;
+}
+
 .debug-bar {
 	position: absolute;
 	bottom: 0;
