@@ -22,6 +22,12 @@ function initScene() {
 	appli.appendChild( renderer.domElement );
 }
 
+window.addEventListener("resize", function() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 const N = 0, E = 1, S = 2, W = 3;
 const wallWidth = 0.2;
 let mapBorder = [];
@@ -29,8 +35,6 @@ function initMap() {
 	const geoBoxSide = new THREE.BoxGeometry(mapLength, 1, wallWidth);
 	const geoBoxEnd = new THREE.BoxGeometry(mapWidth + wallWidth * 2, 1, wallWidth);
 	const matPlane = new THREE.MeshStandardMaterial({
-		// color: 0xe2b96e,
-		// color: 0x00BABC,
 		color: 0x4287f5,
 		side: THREE.DoubleSide,
 		roughness: 0.7,
@@ -55,6 +59,8 @@ function initMap() {
 }
 
 let aquarium;
+let boundingBoxSphere, boundingBoxPaddle;
+let geoCube, geoSphere;
 let cube, sphere;
 const sphereRadius = 0.4;
 const paddleLength = 0.3;
@@ -62,30 +68,40 @@ const paddleWidth = mapWidth * 0.2;
 function initObjects() {
 	initMap();
 
-	const geometry = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
+	// const BufferGeoCube = new THREE.BufferGeometry();
+
+	// boxCube = new THREE.Box3();
+
+	geoCube = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
 	const matBox = new THREE.MeshStandardMaterial({
 		color: 0xfcba03,
 		side: THREE.DoubleSide,
 		roughness: 0.7,
 		metalness: 0.65
 	});
-	cube = new THREE.Mesh(geometry, matBox);
-	// cube.position.set(0, 0.3, 0);
+	cube = new THREE.Mesh(geoCube, matBox);
 	cube.position.set(0, 0.3, mapCenter.length - marginPaddle);
 	cube.castShadow = true;
+	// cube.geometry.computeBoundingBox();
+	boundingBoxPaddle = new THREE.Box3().setFromObject(cube);
+	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+	
 	scene.add(cube);
 
-	const geoSphere = new THREE.SphereGeometry(sphereRadius, 16, 8);
+	geoSphere = new THREE.SphereGeometry(sphereRadius, 16, 8);
+	
 	const matSphere = new THREE.MeshStandardMaterial({
 		color: 0xfcba03,
 		side: THREE.DoubleSide,
-		// roughness: 0.7,
-		// metalness: 0.65
 	});
 	sphere = new THREE.Mesh(geoSphere, matSphere);
 	sphere.position.set(0, 0.3, marginPaddle);
 	sphere.castShadow = true;
+	boundingBoxSphere = new THREE.Box3().setFromObject(sphere);
+	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 	scene.add(sphere);
+
+	// console.log(boundingBoxPaddle.intersectsBox(boundingBoxSphere));
 
 	// const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
 	// const matCylinder = new THREE.MeshStandardMaterial({
@@ -283,9 +299,6 @@ function rotateCamera() {
 const LATERAL = 90;
 const END = 180;
 function updateAngle(side) {
-	// let newAngle = sphereAngle + 180;
-	// let newAngle = sphereAngle * 2 - (sphereAngle - 180);
-	// let newAngle = sphereAngle * 2 - (sphereIncidenceAngle - 180);
 	let newAngle = sphereAngle + (side - sphereAngle) * 2;
 
 	sphereSpeed += 0.01;
@@ -305,26 +318,47 @@ function moveSphere() {
 	
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
+		// geoSphere.translateX(deltaX);
+		// geoSphere.translateZ(deltaZ);
 
-		var marginBeforeWall = marginPaddle + paddleLength / 2;
-		if (sphere.position.z >= mapCenter.length - sphereRadius - marginBeforeWall) {
-			const halfWidth = paddleWidth / 2;
+		// sphere.geometry.boundingSphere().
+		// console.log(sphere.geometry.boundingSphere.intersectBox(cube));
+		
+		// boxCube.copy( cube.geometry.boundingBox ).applyMatrix4( cube.matrixWorld );
+		// console.log(sphere.geometry.boundingSphere.intersect(boxCube));
+		
+		boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+		boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
+		// console.log(boundingBoxPaddle.intersectBox(boundingBoxSphere));
+		// console.log(boundingBoxPaddle.intersectsBox(boundingBoxSphere));
 
-			if (sphere.position.x >= cube.position.x - halfWidth && sphere.position.x <= cube.position.x + halfWidth) {
-
-				sphereAngle = updateAngle(END);
-				return;
-			}
-		}
-		if (sphere.position.z >= mapCenter.length - sphereRadius) {
-			console.log("LOSER!");
-			gameStart = false;
-		} else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
-			console.log("WIN!");
+		if (boundingBoxPaddle.intersectsBox(boundingBoxSphere)) {
+			// sphere.translateX(-deltaX);
+			// sphere.translateZ(-deltaZ);
 			sphereAngle = updateAngle(END);
-		} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
-			sphereAngle = updateAngle(LATERAL);
 		}
+
+		// var marginBeforeWall = marginPaddle + paddleLength / 2;
+		// if (sphere.position.z >= mapCenter.length - sphereRadius - marginBeforeWall) {
+			
+		// 	const halfWidth = paddleWidth / 2;
+
+		// 	if (sphere.position.x >= cube.position.x - halfWidth && sphere.position.x <= cube.position.x + halfWidth) {
+
+		// 		sphereAngle = updateAngle(END);
+		// 		return;
+		// 	}
+		// }
+		// if (sphere.position.z >= mapCenter.length - sphereRadius) {
+		// 	console.log("LOSER!");
+		// 	// console.log(geoSphere.boundingSphere);
+		// 	gameStart = false;
+		// } else if (sphere.position.z <= -mapCenter.length + sphereRadius) {
+		// 	console.log("WIN!");
+		// 	sphereAngle = updateAngle(END);
+		// } else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
+		// 	sphereAngle = updateAngle(LATERAL);
+		// }
 	}
 }
 
