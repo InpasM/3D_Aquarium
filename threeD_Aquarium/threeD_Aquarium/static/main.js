@@ -235,11 +235,12 @@ function updateBox() {
 	}
 }
 
-async function animate() {
+function animate() {
 
 	// moveObject(aquarium);
 	// moveSphere();
 	if (gameStart) {
+		// console.log("animate");
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
 	}
@@ -248,14 +249,13 @@ async function animate() {
 	if (LOCALMULTI) {
 		renderer2.render(scene, camera2);
 	}
-	// await sleep(1000);
 	requestAnimationFrame(animate);
 }
 
 document.addEventListener("keydown", function(e) {
 	const lastKey = e.keyCode;
 
-	console.log(lastKey);
+	// console.log(lastKey);
 	if (lastKey == 87) {
 		movement.N = true;
 	} else if (lastKey == 83) {
@@ -326,9 +326,8 @@ const END = 180;
 function updateAngle(side) {
 	let newAngle = sphereAngle + (side - sphereAngle) * 2;
 
-	if (sphereSpeed < 0.4)
-		sphereSpeed += 0.01;
-	console.log(sphereSpeed);
+	// if (sphereSpeed < 0.4)
+	// 	sphereSpeed += 0.01;
 	if (newAngle > 360)
 		newAngle -= 360;
 	return newAngle;
@@ -338,9 +337,9 @@ let sphereAngle = 90;
 let sphereSpeed = 0.1;
 let goingUp = false;
 
-let deltaX, deltaZ;
+let deltaX = 0, deltaZ = 0;
 function moveSphere() {
-	if (gameStart) {
+	// if (gameStart) {
 		const angleRadian = (sphereAngle * Math.PI) / 180.0
 		deltaX = sphereSpeed * Math.cos(angleRadian);
 		deltaZ = sphereSpeed * Math.sin(angleRadian);
@@ -353,9 +352,26 @@ function moveSphere() {
 		boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 
 		if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
-			// console.log("collision");
+			const halfWidth = paddleWidth / 2;
+
 			sphereAngle = updateAngle(END);
 			goingUp = true;
+
+			let startX = cube.position.x + 3;
+			let endX = cube.position.x + 3 + paddleWidth;
+			let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
+			console.log(sphereAngle);
+
+			sphereAngle = 270 + 60 * coefCollision;
+			// if (coefCollision < 0) {
+			// 	sphereAngle = 270 + 60 * coefCollision;
+			// 	console.log("angle to left angle:", 270 + 60 * coefCollision);
+			// } else {
+			// 	console.log("angle to right angle:", 270 + 60 * coefCollision);
+			// }
+
+			// console.log("cube startX: ", startX, "endX:", endX, "sphere X:", sphere.position.x + 4);
+			// console.log(coefCollision);
 		}
 
 		// var marginBeforeWall = marginPaddle + paddleLength / 2;
@@ -369,17 +385,19 @@ function moveSphere() {
 		// 		return;
 		// 	}
 		// }
-		if (sphere.position.z >= mapCenter.length - sphereRadius) {
-			console.log("LOSER!");
-			gameStart = false;
-			// goingUp = true;
+		if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
+			// console.log("LOSER!");
+			// gameStart = false;
+			goingUp = true;
+			sphereAngle = updateAngle(END);
 		} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
 			goingUp = false;
 			sphereAngle = updateAngle(END);
 		} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
 			sphereAngle = updateAngle(LATERAL);
 		}
-	}
+		// console.log("cube x: ", paddleWidth);
+	// }
 }
 
 document.addEventListener("click", startGame);
@@ -464,8 +482,7 @@ function initPageElement() {
 }
 
 function updateGame() {
-	if (gameRunning) {
-		console.log("game running");
+	if (gameRunning && gameStart) {
 		moveSphere();
 	}
 }
@@ -478,7 +495,7 @@ initScene();
 initObjects();
 initGround();
 initLights();
-animate();
 
 setInterval(updateGame, 2);
-updateGame();
+animate();
+
