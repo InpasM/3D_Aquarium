@@ -339,65 +339,39 @@ let goingUp = false;
 
 let deltaX = 0, deltaZ = 0;
 function moveSphere() {
-	// if (gameStart) {
-		const angleRadian = (sphereAngle * Math.PI) / 180.0
-		deltaX = sphereSpeed * Math.cos(angleRadian);
-		deltaZ = sphereSpeed * Math.sin(angleRadian);
-	
-		// sphere.translateX(deltaX);
-		// sphere.translateZ(deltaZ);
+	const angleRadian = (sphereAngle * Math.PI) / 180.0
+	deltaX = sphereSpeed * Math.cos(angleRadian);
+	deltaZ = sphereSpeed * Math.sin(angleRadian);
 
-		// using bounding box
-		boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
-		boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
+	// using bounding box
+	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 
-		if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
-			const halfWidth = paddleWidth / 2;
+	if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
+		const halfWidth = paddleWidth / 2;
 
-			sphereAngle = updateAngle(END);
-			goingUp = true;
+		sphereAngle = updateAngle(END);
+		goingUp = true;
 
-			let startX = cube.position.x + 3;
-			let endX = cube.position.x + 3 + paddleWidth;
-			let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
-			console.log(sphereAngle);
+		let startX = cube.position.x + 3;
+		let endX = cube.position.x + 3 + paddleWidth;
+		let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
+		console.log(sphereAngle);
 
-			sphereAngle = 270 + 60 * coefCollision;
-			// if (coefCollision < 0) {
-			// 	sphereAngle = 270 + 60 * coefCollision;
-			// 	console.log("angle to left angle:", 270 + 60 * coefCollision);
-			// } else {
-			// 	console.log("angle to right angle:", 270 + 60 * coefCollision);
-			// }
+		sphereAngle = 270 + 90 * coefCollision;
+	}
 
-			// console.log("cube startX: ", startX, "endX:", endX, "sphere X:", sphere.position.x + 4);
-			// console.log(coefCollision);
-		}
-
-		// var marginBeforeWall = marginPaddle + paddleLength / 2;
-		// if (sphere.position.z >= mapCenter.length - sphereRadius - marginBeforeWall) {
-			
-		// 	const halfWidth = paddleWidth / 2;
-
-		// 	if (sphere.position.x >= cube.position.x - halfWidth && sphere.position.x <= cube.position.x + halfWidth) {
-
-		// 		sphereAngle = updateAngle(END);
-		// 		return;
-		// 	}
-		// }
-		if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
-			// console.log("LOSER!");
-			// gameStart = false;
-			goingUp = true;
-			sphereAngle = updateAngle(END);
-		} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
-			goingUp = false;
-			sphereAngle = updateAngle(END);
-		} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
-			sphereAngle = updateAngle(LATERAL);
-		}
-		// console.log("cube x: ", paddleWidth);
-	// }
+	if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
+		// console.log("LOSER!");
+		// gameStart = false;
+		goingUp = true;
+		sphereAngle = updateAngle(END);
+	} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
+		goingUp = false;
+		sphereAngle = updateAngle(END);
+	} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
+		sphereAngle = updateAngle(LATERAL);
+	}
 }
 
 document.addEventListener("click", startGame);
