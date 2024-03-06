@@ -7,7 +7,7 @@ const appli2 = document.querySelector('#app2');
 const containerGame = document.querySelector('.container-game');
 containerGame.style.display = "flex";
 
-const mapWidth = 10;
+const mapWidth = 8;
 const mapLength = 10;
 const mapCenter = {width: mapWidth / 2, length: mapLength / 2};
 const scene = new THREE.Scene();
@@ -66,11 +66,13 @@ window.addEventListener("resize", function() {
 });
 
 const N = 0, E = 1, S = 2, W = 3;
-const wallWidth = 0.2;
+const wallWidth = 0.4;
+const wallHeight = 1;
+const wallHeightEnd = 0.05;
 let mapBorder = [];
 function initMap() {
-	const geoBoxSide = new THREE.BoxGeometry(mapLength, 1, wallWidth);
-	const geoBoxEnd = new THREE.BoxGeometry(mapWidth + wallWidth * 2, 1, wallWidth);
+	const geoBoxSide = new THREE.BoxGeometry(mapLength + wallWidth * 2, wallHeight, wallWidth);
+	const geoBoxEnd = new THREE.BoxGeometry(mapWidth, wallHeightEnd, wallWidth);
 	const matPlane = new THREE.MeshStandardMaterial({
 		color: 0x4287f5,
 		side: THREE.DoubleSide,
@@ -229,7 +231,8 @@ function updateCamera() {
 
 const marginPaddle = paddleLength * 2;
 function updateBox() {
-	let posZ = (mousePos[0] / (window.innerWidth - marginBox) * 8) - 4;
+	let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
+	console.log(posZ);
 	if (gameStart) {
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
 	}
@@ -237,10 +240,7 @@ function updateBox() {
 
 function animate() {
 
-	// moveObject(aquarium);
-	// moveSphere();
 	if (gameStart) {
-		// console.log("animate");
 		sphere.translateX(deltaX);
 		sphere.translateZ(deltaZ);
 	}
