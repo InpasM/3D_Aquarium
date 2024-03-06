@@ -71,6 +71,7 @@ const wallWidth = 0.4;
 const wallHeight = 1;
 const wallHeightEnd = 0.05;
 let mapBorder = [];
+let boundingWallLeft, boundingWallRight;
 function initMap() {
 	const geoBoxSide = new THREE.BoxGeometry(mapLength + wallWidth * 2, wallHeight, wallWidth);
 	const geoBoxEnd = new THREE.BoxGeometry(mapWidth, wallHeightEnd, wallWidth);
@@ -96,6 +97,11 @@ function initMap() {
 	mapBorder[E].position.set(mapCenter.width + wallWidth / 2, 0, 0);
 	mapBorder[S].position.set(0, 0, mapCenter.length + wallWidth / 2);
 	mapBorder[W].position.set(-mapCenter.width - wallWidth / 2, 0, 0);
+
+	boundingWallLeft = new THREE.Box3().setFromObject(mapBorder[W]);
+	boundingWallLeft.copy(mapBorder[W].geometry.boundingBox).applyMatrix4(mapBorder[W].matrixWorld);
+	boundingWallRight = new THREE.Box3().setFromObject(mapBorder[E]);
+	boundingWallRight.copy(mapBorder[E].geometry.boundingBox).applyMatrix4(mapBorder[E].matrixWorld);
 }
 
 let aquarium;
@@ -346,7 +352,7 @@ function updateAngle(side) {
 
 let sphereAngle = 90;
 let sphereSpeed = 0.1;
-let goingUp = false;
+let goingUp = false, goingLeft = false, goingRight = false;
 
 let deltaX = 0, deltaZ = 0;
 function moveSphere() {
@@ -358,7 +364,8 @@ function moveSphere() {
 	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
 	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 
-	if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
+	// if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
+	if (boundingBoxSphere.intersectsBox(boundingBoxPaddle) && !goingUp) {
 		const halfWidth = paddleWidth / 2;
 
 		sphereAngle = updateAngle(END);
@@ -379,8 +386,16 @@ function moveSphere() {
 		goingUp = false;
 		// reloadGame(playerGoal);
 		sphereAngle = updateAngle(END);
-	} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
+	}
+	// } else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
+	if (boundingBoxSphere.intersectsBox(boundingWallLeft) && goingLeft) {
 		sphereAngle = updateAngle(LATERAL);
+		goingLeft = false;
+		goingRight = true;
+	} else if (boundingBoxSphere.intersectsBox(boundingWallRight) && goingRight) {
+		sphereAngle = updateAngle(LATERAL);
+		goingLeft = true;
+		goingRight = false;
 	}
 }
 
