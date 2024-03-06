@@ -343,8 +343,8 @@ const END = 180;
 function updateAngle(side) {
 	let newAngle = sphereAngle + (side - sphereAngle) * 2;
 
-	// if (sphereSpeed < 0.4)
-	// 	sphereSpeed += 0.01;
+	if (sphereSpeed < 0.4)
+		sphereSpeed += 0.01;
 	if (newAngle > 360)
 		newAngle -= 360;
 	return newAngle;
@@ -352,7 +352,8 @@ function updateAngle(side) {
 
 let sphereAngle = 90;
 let sphereSpeed = 0.1;
-let goingUp = false, goingLeft = false, goingRight = false;
+let goingUp = false, directionBall = 0;
+const LEFT = 1, RIGHT = 2;
 
 let deltaX = 0, deltaZ = 0;
 function moveSphere() {
@@ -364,19 +365,21 @@ function moveSphere() {
 	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
 	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 
-	// if (boundingBoxPaddle.intersectsBox(boundingBoxSphere) && !goingUp) {
 	if (boundingBoxSphere.intersectsBox(boundingBoxPaddle) && !goingUp) {
 		const halfWidth = paddleWidth / 2;
 
 		sphereAngle = updateAngle(END);
 		goingUp = true;
-
+		
 		let startX = cube.position.x + 3;
-		let endX = cube.position.x + 3 + paddleWidth;
 		let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
-		console.log(sphereAngle);
-
+		
 		sphereAngle = 270 + 90 * coefCollision;
+		if (sphereAngle < 270) {
+			directionBall = LEFT;
+		} else {
+			directionBall = RIGHT;
+		}
 	}
 
 	if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
@@ -387,15 +390,12 @@ function moveSphere() {
 		// reloadGame(playerGoal);
 		sphereAngle = updateAngle(END);
 	}
-	// } else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
-	if (boundingBoxSphere.intersectsBox(boundingWallLeft) && goingLeft) {
+	if (boundingBoxSphere.intersectsBox(boundingWallLeft) && directionBall == LEFT) {
 		sphereAngle = updateAngle(LATERAL);
-		goingLeft = false;
-		goingRight = true;
-	} else if (boundingBoxSphere.intersectsBox(boundingWallRight) && goingRight) {
+		directionBall = RIGHT;
+	} else if (boundingBoxSphere.intersectsBox(boundingWallRight) && directionBall == RIGHT) {
 		sphereAngle = updateAngle(LATERAL);
-		goingLeft = true;
-		goingRight = false;
+		directionBall = LEFT;
 	}
 }
 
