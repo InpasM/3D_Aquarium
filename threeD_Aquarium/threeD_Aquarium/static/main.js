@@ -232,10 +232,10 @@ function updateCamera() {
 const marginPaddle = paddleLength * 2;
 function updateBox() {
 	let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
-	console.log(posZ);
-	if (gameStart) {
+	// console.log(posZ);
+	// if (gameStart) {
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
-	}
+	// }
 }
 
 function animate() {
@@ -362,13 +362,23 @@ function moveSphere() {
 	}
 
 	if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
+		goingUp = true;
 		// console.log("LOSER!");
 		// gameStart = false;
-		goingUp = true;
-		sphereAngle = updateAngle(END);
+		// sphereAngle = updateAngle(END);
+
+		// opponentScore++;
+		// setTimeout(reloadGame, 500);
+		reloadGame(opponentGoal);
+		
 	} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
 		goingUp = false;
-		sphereAngle = updateAngle(END);
+		reloadGame(playerGoal);
+		// playerScore++;
+		// setTimeout(reloadGame, 500);
+		// reloadGame();
+		
+		// sphereAngle = updateAngle(END);
 	} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
 		sphereAngle = updateAngle(LATERAL);
 	}
@@ -398,25 +408,25 @@ function startGame(e) {
 		firstStart = false;
 	}
 
-	elements.mouseBox.addEventListener("mousemove", function(e) {
-		const fixPosX = e.clientX - marginBox / 2;
-		const fixPosY = e.clientY - marginBox / 2;
-		mousePos = [fixPosX, fixPosY];
-		mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
-		mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
-		// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
-	});
-	elements.mouseBox.addEventListener("mouseleave", function(e) {
-		// console.log("leaving x:", mousePos[0], "y:", mousePos[1]);
-		const mouseBoxWidth = window.innerWidth - marginBox;
-		let midWidth = mouseBoxWidth / 2;
+	// elements.mouseBox.addEventListener("mousemove", function(e) {
+	// 	const fixPosX = e.clientX - marginBox / 2;
+	// 	const fixPosY = e.clientY - marginBox / 2;
+	// 	mousePos = [fixPosX, fixPosY];
+	// 	mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
+	// 	mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
+	// 	// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
+	// });
+	// elements.mouseBox.addEventListener("mouseleave", function(e) {
+	// 	// console.log("leaving x:", mousePos[0], "y:", mousePos[1]);
+	// 	const mouseBoxWidth = window.innerWidth - marginBox;
+	// 	let midWidth = mouseBoxWidth / 2;
 
-		if (mousePos[0] >= midWidth && mousePos[0] > mouseBoxWidth - precisionLeaving) {
-			mousePos[0] = window.innerWidth - marginBox;
-		}
-		else if (mousePos[0] < precisionLeaving)
-			mousePos[0] = 0;
-	});
+	// 	if (mousePos[0] >= midWidth && mousePos[0] > mouseBoxWidth - precisionLeaving) {
+	// 		mousePos[0] = window.innerWidth - marginBox;
+	// 	}
+	// 	else if (mousePos[0] < precisionLeaving)
+	// 		mousePos[0] = 0;
+	// });
 }
 
 const marginBox = 80;
@@ -461,15 +471,73 @@ function updateGame() {
 	}
 }
 
+const playerGoal = 1, opponentGoal = 2;
+function reloadGame(whoScore) {
+	if (whoScore == playerGoal)
+		playerScore++;
+	else
+		opponentScore++;
+	updateScore();
+
+	setTimeout(function() {
+		
+		gameStart = false;
+		if (whoScore == playerGoal)
+			sphereAngle = 90;
+		else
+			sphereAngle = 270;
+		sphereSpeed = 0.1;
+		sphere.position.set(0, 0.3, marginPaddle);
+		goingUp = false;
+	}, 500);
+}
+
+function updateScore() {
+	containerScore.innerHTML = playerScore + " : " + opponentScore;
+}
+
+function initMouseEvent() {
+
+	// document.body.style.cursor = "none";
+	elements.mouseBox.addEventListener("mousemove", function(e) {
+		const fixPosX = e.clientX - marginBox / 2;
+		const fixPosY = e.clientY - marginBox / 2;
+		mousePos = [fixPosX, fixPosY];
+		mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
+		mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
+		// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
+	});
+
+	elements.mouseBox.addEventListener("mouseleave", function(e) {
+		const mouseBoxWidth = window.innerWidth - marginBox;
+		let midWidth = mouseBoxWidth / 2;
+
+		if (mousePos[0] >= midWidth && mousePos[0] > mouseBoxWidth - precisionLeaving) {
+			mousePos[0] = window.innerWidth - marginBox;
+		}
+		else if (mousePos[0] < precisionLeaving)
+			mousePos[0] = 0;
+	});
+}
+
 let elements = initPageElement();
 let gameRunning = true;
 
-// document.body.style.cursor = "none";
 initScene();
 initObjects();
 initGround();
 initLights();
+initMouseEvent();
 
 setInterval(updateGame, 2);
 animate();
 
+var playerScore = 0, opponentScore = 0;
+const containerScore = document.querySelector(".container-score");
+containerScore.style.position = "absolute";
+containerScore.style.top = "20px";
+containerScore.style.left = window.innerWidth / 2 - 30 + "px";
+containerScore.style.color = "white";
+containerScore.style.fontSize = "30px";
+
+updateScore();
