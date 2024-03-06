@@ -15,6 +15,7 @@ const scene = new THREE.Scene();
 let gameWidth = 0;
 // local multi
 const LOCALMULTI = false;
+const USEMOUSE = false;
 let camera2, renderer2;
 if (LOCALMULTI) {
 	gameWidth = window.innerWidth / 2;
@@ -121,6 +122,7 @@ function initObjects() {
 	cube = new THREE.Mesh(geoCube, matBox);
 	cube.position.set(0, 0.3, mapCenter.length - marginPaddle);
 	cube.castShadow = true;
+	// cube.geometry.needsUpdate = true;
 	// cube.geometry.computeBoundingBox();
 	boundingBoxPaddle = new THREE.Box3().setFromObject(cube);
 	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
@@ -210,18 +212,23 @@ var movement = {
 	E: false,
 }
 
+const SPEEDKEYBOARD = 0.1;
 function moveObject(obj) {
-	if (movement.N) {
-		obj.translateX(-0.01);
+	let widthSlidePaddle = (mapWidth * 0.8) / 2;
+
+	// if (movement.N) {
+	// 	obj.translateX(-SPEEDKEYBOARD);
+	// }
+	// if (movement.S) {
+	// 	obj.translateX(SPEEDKEYBOARD);
+	// }
+	if (movement.W && obj.position.x > -widthSlidePaddle) {
+		// mousePos[0] -= 0.1;
+		obj.translateX(-SPEEDKEYBOARD);
 	}
-	if (movement.S) {
-		obj.translateX(0.01);
-	}
-	if (movement.W) {
-		obj.translateZ(0.01);
-	}
-	if (movement.E) {
-		obj.translateZ(-0.01);
+	else if (movement.E && obj.position.x < widthSlidePaddle) {
+		// mousePos[0] += 0.1;
+		obj.translateX(SPEEDKEYBOARD);
 	}
 }
 
@@ -231,11 +238,28 @@ function updateCamera() {
 
 const marginPaddle = paddleLength * 2;
 function updateBox() {
-	let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
-	// console.log(posZ);
-	// if (gameStart) {
+
+	if (USEMOUSE) {
+		let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
-	// }
+	} else {
+		let widthSlidePaddle = (mapWidth * 0.8) / 2;
+
+		// console.log(-widthSlidePaddle + widthSlidePaddle * 0.01);
+		// if (cube.position.x > -widthSlidePaddle + widthSlidePaddle * 0.01 && cube.position.x < widthSlidePaddle - widthSlidePaddle * 0.01) {
+			// if (widthSlidePaddle)
+			// console.log(widthSlidePaddle - widthSlidePaddle / 2);
+			moveObject(cube);
+			// console.log(cube.position.x, (mapWidth) * 0.8);
+			// let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
+			// cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
+		// }
+			// } else if (cube.position.x < -widthSlidePaddle) {
+		// 	cube.position.x = -widthSlidePaddle + widthSlidePaddle * 0.001;
+		// } else if (cube.position.x > widthSlidePaddle) {
+		// 	cube.position.x = widthSlidePaddle - widthSlidePaddle * 0.001;
+		// }
+	}
 }
 
 function animate() {
@@ -262,8 +286,10 @@ document.addEventListener("keydown", function(e) {
 		movement.S = true;
 	} else if (lastKey == 65) {
 		movement.W = true;
+		mousePos[0] -= 10;
 	} else if (lastKey == 68) {
 		movement.E = true;
+		mousePos[0] += 10;
 	} else if (lastKey == 27) {
 		gameRunning = false;
 	}
@@ -502,7 +528,12 @@ initScene();
 initObjects();
 initGround();
 initLights();
-initMouseEvent();
+
+if (USEMOUSE) {
+	initMouseEvent();
+} else {
+	// initKeyboardEvent();
+}
 
 setInterval(updateGame, 2);
 animate();
