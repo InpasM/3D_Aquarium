@@ -243,22 +243,7 @@ function updateBox() {
 		let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
 	} else {
-		let widthSlidePaddle = (mapWidth * 0.8) / 2;
-
-		// console.log(-widthSlidePaddle + widthSlidePaddle * 0.01);
-		// if (cube.position.x > -widthSlidePaddle + widthSlidePaddle * 0.01 && cube.position.x < widthSlidePaddle - widthSlidePaddle * 0.01) {
-			// if (widthSlidePaddle)
-			// console.log(widthSlidePaddle - widthSlidePaddle / 2);
-			moveObject(cube);
-			// console.log(cube.position.x, (mapWidth) * 0.8);
-			// let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
-			// cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
-		// }
-			// } else if (cube.position.x < -widthSlidePaddle) {
-		// 	cube.position.x = -widthSlidePaddle + widthSlidePaddle * 0.001;
-		// } else if (cube.position.x > widthSlidePaddle) {
-		// 	cube.position.x = widthSlidePaddle - widthSlidePaddle * 0.001;
-		// }
+		moveObject(cube);
 	}
 }
 
@@ -389,22 +374,11 @@ function moveSphere() {
 
 	if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
 		goingUp = true;
-		// console.log("LOSER!");
-		// gameStart = false;
-		// sphereAngle = updateAngle(END);
-
-		// opponentScore++;
-		// setTimeout(reloadGame, 500);
 		reloadGame(opponentGoal);
-		
 	} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
 		goingUp = false;
-		reloadGame(playerGoal);
-		// playerScore++;
-		// setTimeout(reloadGame, 500);
-		// reloadGame();
-		
-		// sphereAngle = updateAngle(END);
+		// reloadGame(playerGoal);
+		sphereAngle = updateAngle(END);
 	} else if (sphere.position.x >= mapCenter.width - sphereRadius || sphere.position.x <= -mapCenter.width + sphereRadius) {
 		sphereAngle = updateAngle(LATERAL);
 	}
