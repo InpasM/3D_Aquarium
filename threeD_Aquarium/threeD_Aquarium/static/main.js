@@ -398,35 +398,6 @@ function startGame(e) {
 	document.addEventListener("mousedown", function(e) {
 		mouseDown = true;
 	});
-
-	// moveSphere(1);
-	if (firstStart) {
-		mouseStartPos = [e.clientX - marginBox / 2, e.clientY - marginBox / 2];
-		const fixPosX = e.clientX - marginBox / 2;
-		const fixPosY = e.clientY - marginBox / 2;
-		mousePos = [fixPosX, fixPosY];
-		firstStart = false;
-	}
-
-	// elements.mouseBox.addEventListener("mousemove", function(e) {
-	// 	const fixPosX = e.clientX - marginBox / 2;
-	// 	const fixPosY = e.clientY - marginBox / 2;
-	// 	mousePos = [fixPosX, fixPosY];
-	// 	mousePosX.innerText = "x: " + fixPosX + " / " + (window.innerWidth - marginBox);
-	// 	mousePosY.innerText = "y: " + fixPosY + " / " + (window.innerHeight - marginBox);
-	// 	// mouseSide.innerText = "side: " + whichSide(e.clientX, e.clientY);
-	// });
-	// elements.mouseBox.addEventListener("mouseleave", function(e) {
-	// 	// console.log("leaving x:", mousePos[0], "y:", mousePos[1]);
-	// 	const mouseBoxWidth = window.innerWidth - marginBox;
-	// 	let midWidth = mouseBoxWidth / 2;
-
-	// 	if (mousePos[0] >= midWidth && mousePos[0] > mouseBoxWidth - precisionLeaving) {
-	// 		mousePos[0] = window.innerWidth - marginBox;
-	// 	}
-	// 	else if (mousePos[0] < precisionLeaving)
-	// 		mousePos[0] = 0;
-	// });
 }
 
 const marginBox = 80;
@@ -482,13 +453,17 @@ function reloadGame(whoScore) {
 	setTimeout(function() {
 		
 		gameStart = false;
-		if (whoScore == playerGoal)
+		if (whoScore == playerGoal) {
 			sphereAngle = 90;
-		else
+			goingUp = false;
+		}
+		else {
 			sphereAngle = 270;
+			goingUp = true;
+		}
 		sphereSpeed = 0.1;
 		sphere.position.set(0, 0.3, marginPaddle);
-		goingUp = false;
+		document.addEventListener("click", startGame);
 	}, 500);
 }
 
