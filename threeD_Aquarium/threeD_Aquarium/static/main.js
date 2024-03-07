@@ -229,18 +229,9 @@ const SPEEDKEYBOARD = 0.1;
 function moveObject(obj) {
 	let widthSlidePaddle = (mapWidth * 0.8) / 2;
 
-	// if (movement.N) {
-	// 	obj.translateX(-SPEEDKEYBOARD);
-	// }
-	// if (movement.S) {
-	// 	obj.translateX(SPEEDKEYBOARD);
-	// }
 	if (movement.W && obj.position.x > -widthSlidePaddle) {
-		// mousePos[0] -= 0.1;
 		obj.translateX(-SPEEDKEYBOARD);
-	}
-	else if (movement.E && obj.position.x < widthSlidePaddle) {
-		// mousePos[0] += 0.1;
+	} else if (movement.E && obj.position.x < widthSlidePaddle) {
 		obj.translateX(SPEEDKEYBOARD);
 	}
 }
@@ -274,38 +265,7 @@ function animate() {
 	requestAnimationFrame(animate);
 }
 
-document.addEventListener("keydown", function(e) {
-	const lastKey = e.keyCode;
 
-	// console.log(lastKey);
-	if (lastKey == 87) {
-		movement.N = true;
-	} else if (lastKey == 83) {
-		movement.S = true;
-	} else if (lastKey == 65) {
-		movement.W = true;
-		mousePos[0] -= 10;
-	} else if (lastKey == 68) {
-		movement.E = true;
-		mousePos[0] += 10;
-	} else if (lastKey == 27) {
-		gameRunning = false;
-	}
-});
-
-document.addEventListener("keyup", function(e) {
-	const lastKey = e.keyCode;
-
-	if (lastKey == 87) {
-		movement.N = false;
-	} else if (lastKey == 83) {
-		movement.S = false;
-	} else if (lastKey == 65) {
-		movement.W = false;
-	} else if (lastKey == 68) {
-		movement.E = false;
-	}
-});
 
 document.addEventListener("wheel", function(e) {
 	if (e.deltaY > 0) {
@@ -517,6 +477,40 @@ function initMouseEvent() {
 	});
 }
 
+function initKeyboardEvent() {
+	document.addEventListener("keydown", function(e) {
+		const lastKey = e.keyCode;
+	
+		// console.log(lastKey);
+		if (lastKey == 87) {
+			movement.N = true;
+		} else if (lastKey == 83) {
+			movement.S = true;
+		} else if (lastKey == 65) {
+			movement.W = true;
+			mousePos[0] -= 10;
+		} else if (lastKey == 68) {
+			movement.E = true;
+			mousePos[0] += 10;
+		} else if (lastKey == 27) {
+			gameRunning = false;
+		}
+	});
+	document.addEventListener("keyup", function(e) {
+		const lastKey = e.keyCode;
+	
+		if (lastKey == 87) {
+			movement.N = false;
+		} else if (lastKey == 83) {
+			movement.S = false;
+		} else if (lastKey == 65) {
+			movement.W = false;
+		} else if (lastKey == 68) {
+			movement.E = false;
+		}
+	});
+}
+
 let elements = initPageElement();
 let gameRunning = true;
 
@@ -528,7 +522,7 @@ initLights();
 if (USEMOUSE) {
 	initMouseEvent();
 } else {
-	// initKeyboardEvent();
+	initKeyboardEvent();
 }
 
 setInterval(updateGame, 2);
