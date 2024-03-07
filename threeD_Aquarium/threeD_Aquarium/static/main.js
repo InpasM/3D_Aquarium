@@ -8,20 +8,20 @@ const containerGame = document.querySelector('.container-game');
 containerGame.style.display = "flex";
 
 const mapWidth = 8;
-const mapLength = 10;
+const mapLength = 16;
 const mapCenter = {width: mapWidth / 2, length: mapLength / 2};
 const scene = new THREE.Scene();
 
 let gameWidth = 0;
 // local multi
-const LOCALMULTI = false;
+const LOCALMULTI = true;
 const USEMOUSE = false;
 let camera2, renderer2;
 if (LOCALMULTI) {
 	gameWidth = window.innerWidth / 2;
 
-	camera2 = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 200);
-	var cameraPos2 = new THREE.Vector3(0, 10, -12);
+	camera2 = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 500);
+	var cameraPos2 = new THREE.Vector3(0, 12, -16);
 	camera2.position.set(cameraPos2.getComponent(0), cameraPos2.getComponent(1), cameraPos2.getComponent(2));
 	camera2.lookAt(0, 0, 0);
 
@@ -30,8 +30,8 @@ if (LOCALMULTI) {
 	gameWidth = window.innerWidth;
 }
 
-const camera = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 200);
-var cameraPos = new THREE.Vector3(0, 10, 12);
+const camera = new THREE.PerspectiveCamera(50, gameWidth / window.innerHeight, 1, 500);
+var cameraPos = new THREE.Vector3(0, 12, 16);
 camera.position.set(cameraPos.getComponent(0), cameraPos.getComponent(1), cameraPos.getComponent(2));
 camera.lookAt(0, 0, 0);
 
@@ -440,28 +440,35 @@ function updateGame() {
 }
 
 const playerGoal = 1, opponentGoal = 2;
+let changeScore = true;
 function reloadGame(whoScore) {
-	if (whoScore == playerGoal)
-		playerScore++;
-	else
-		opponentScore++;
-	updateScore();
+	
+	if (changeScore) {
+		changeScore = false;
 
-	setTimeout(function() {
-		
-		gameStart = false;
-		if (whoScore == playerGoal) {
-			sphereAngle = 90;
-			goingUp = false;
-		}
-		else {
-			sphereAngle = 270;
-			goingUp = true;
-		}
-		sphereSpeed = 0.1;
-		sphere.position.set(0, 0.3, marginPaddle);
-		document.addEventListener("click", startGame);
-	}, 500);
+		if (whoScore == playerGoal)
+			playerScore++;
+		else
+			opponentScore++;
+		updateScore();
+	
+		setTimeout(function() {
+			
+			gameStart = false;
+			if (whoScore == playerGoal) {
+				sphereAngle = 90;
+				goingUp = false;
+			}
+			else {
+				sphereAngle = 270;
+				goingUp = true;
+			}
+			sphereSpeed = 0.1;
+			sphere.position.set(0, 0.3, marginPaddle);
+			changeScore = true;
+			document.addEventListener("click", startGame);
+		}, 500);
+	}
 }
 
 function updateScore() {
@@ -506,9 +513,15 @@ function initKeyboardEvent() {
 		} else if (lastKey == 68) {
 			movePaddleOne.E = true;
 		} else if (lastKey == 100) {
-			movePaddleTwo.W = true;
+			if (LOCALMULTI)
+				movePaddleTwo.E = true;
+			else
+				movePaddleTwo.W = true;
 		} else if (lastKey == 102) {
-			movePaddleTwo.E = true;
+			if (LOCALMULTI)
+				movePaddleTwo.W = true;
+			else
+				movePaddleTwo.E = true;
 		} else if (lastKey == 27) {
 			gameRunning = false;
 		}
@@ -525,9 +538,17 @@ function initKeyboardEvent() {
 		} else if (lastKey == 68) {
 			movePaddleOne.E = false;
 		} else if (lastKey == 100) {
-			movePaddleTwo.W = false;
+			if (LOCALMULTI)
+				movePaddleTwo.E = false;
+			else
+				movePaddleTwo.W = false;
+			// movePaddleTwo.W = false;
 		} else if (lastKey == 102) {
-			movePaddleTwo.E = false;
+			if (LOCALMULTI)
+				movePaddleTwo.W = false;
+			else
+				movePaddleTwo.E = false;
+			// movePaddleTwo.E = false;
 		}
 	});
 }
