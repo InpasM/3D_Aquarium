@@ -386,19 +386,9 @@ const marginBox = 80;
 function resizeMouseBox(mouseBox) {
 	let sizeWidth = 0, sizeHeight = 0, margin = 0;
 
-	// if (window.innerWidth > 150 && window.innerHeight > 150) {
-		sizeWidth = window.innerWidth - marginBox;
-		sizeHeight = window.innerHeight - marginBox;
-		margin = marginBox / 2;
-	// } else {
-	// 	if (window.innerWidth > window.innerHeight) {
-	// 		margin = window.innerHeight * 0.05;	
-	// 	} else {
-	// 		margin = window.innerWidth * 0.05;
-	// 	}
-	// 	sizeWidth = window.innerWidth - margin * 2;
-	// 	sizeHeight = window.innerHeight - margin * 2;
-	// }
+	sizeWidth = window.innerWidth - marginBox;
+	sizeHeight = window.innerHeight - marginBox;
+	margin = marginBox / 2;
 	mouseBox.style.width = sizeWidth + "px";
 	mouseBox.style.height = sizeHeight + "px";
 	mouseBox.style.left = margin + "px";
