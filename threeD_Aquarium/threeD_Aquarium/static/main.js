@@ -107,36 +107,45 @@ function initMap() {
 let aquarium;
 let boundingBoxSphere, boundingBoxPaddle;
 let geoCube, geoSphere;
-let cube, sphere;
+let paddleOne, paddleTwo, boundingPaddleOne, boundingPaddleTwo, cube, sphere;
 const sphereRadius = 0.4;
 const paddleLength = 0.3;
 const paddleWidth = mapWidth * 0.2;
 function initObjects() {
 	initMap();
 
-	// const BufferGeoCube = new THREE.BufferGeometry();
-
-	// boxCube = new THREE.Box3();
-
-	geoCube = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
-	const matBox = new THREE.MeshStandardMaterial({
+	const materialPaddle = new THREE.MeshStandardMaterial({
 		color: 0xfcba03,
 		side: THREE.DoubleSide,
 		roughness: 0.7,
 		metalness: 0.65
 	});
-	cube = new THREE.Mesh(geoCube, matBox);
-	cube.position.set(0, 0.3, mapCenter.length - marginPaddle);
-	cube.castShadow = true;
-	// cube.geometry.needsUpdate = true;
-	// cube.geometry.computeBoundingBox();
-	boundingBoxPaddle = new THREE.Box3().setFromObject(cube);
-	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+	geoCube = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
+
+	paddleOne = new THREE.Mesh(geoCube, materialPaddle);
+	paddleOne.position.set(0, 0.3, mapCenter.length - marginPaddle);
+	paddleOne.castShadow = true;
+	boundingPaddleOne = new THREE.Box3().setFromObject(paddleOne);
+	boundingPaddleOne.copy(paddleOne.geometry.boundingBox).applyMatrix4(paddleOne.matrixWorld);
+	scene.add(paddleOne);
+
+	paddleTwo = new THREE.Mesh(geoCube, materialPaddle);
+	paddleTwo.position.set(0, 0.3, -mapCenter.length + marginPaddle);
+	paddleTwo.castShadow = true;
+	boundingPaddleTwo = new THREE.Box3().setFromObject(paddleTwo);
+	boundingPaddleTwo.copy(paddleTwo.geometry.boundingBox).applyMatrix4(paddleTwo.matrixWorld);
+	scene.add(paddleTwo);
+
+	// cube = new THREE.Mesh(geoCube, materialPaddle);
+	// cube.position.set(0, 0.3, mapCenter.length - marginPaddle);
+	// cube.castShadow = true;
+
+	// boundingBoxPaddle = new THREE.Box3().setFromObject(cube);
+	// boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
 	
-	scene.add(cube);
+	// scene.add(cube);
 
 	geoSphere = new THREE.SphereGeometry(sphereRadius, 16, 8);
-	
 	const matSphere = new THREE.MeshStandardMaterial({
 		color: 0xfcba03,
 		side: THREE.DoubleSide,
@@ -147,8 +156,6 @@ function initObjects() {
 	boundingBoxSphere = new THREE.Box3().setFromObject(sphere);
 	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 	scene.add(sphere);
-
-	// console.log(boundingBoxPaddle.intersectsBox(boundingBoxSphere));
 
 	// const geoCylinder = new THREE.CylinderGeometry(2, 2, 4, 64);
 	// const matCylinder = new THREE.MeshStandardMaterial({
