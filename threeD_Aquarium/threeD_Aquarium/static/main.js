@@ -218,7 +218,14 @@ function initLights() {
 	scene.add(ambient);
 }
 
-var movement = {
+var movePaddleOne = {
+	N: false,
+	S: false,
+	W: false,
+	E: false,
+}
+
+var movePaddleTwo = {
 	N: false,
 	S: false,
 	W: false,
@@ -226,13 +233,18 @@ var movement = {
 }
 
 const SPEEDKEYBOARD = 0.1;
-function moveObject(obj) {
+function movePaddleKeyboard() {
 	let widthSlidePaddle = (mapWidth * 0.8) / 2;
 
-	if (movement.W && obj.position.x > -widthSlidePaddle) {
-		obj.translateX(-SPEEDKEYBOARD);
-	} else if (movement.E && obj.position.x < widthSlidePaddle) {
-		obj.translateX(SPEEDKEYBOARD);
+	if (movePaddleOne.W && paddleOne.position.x > -widthSlidePaddle) {
+		paddleOne.translateX(-SPEEDKEYBOARD);
+	} else if (movePaddleOne.E && paddleOne.position.x < widthSlidePaddle) {
+		paddleOne.translateX(SPEEDKEYBOARD);
+	}
+	if (movePaddleTwo.W && paddleTwo.position.x > -widthSlidePaddle) {
+		paddleTwo.translateX(-SPEEDKEYBOARD);
+	} else if (movePaddleTwo.E && paddleTwo.position.x < widthSlidePaddle) {
+		paddleTwo.translateX(SPEEDKEYBOARD);
 	}
 }
 
@@ -247,7 +259,8 @@ function updateBox() {
 		let posZ = ((mousePos[0] / (window.innerWidth - marginBox) * mapWidth) - mapWidth / 2) * 0.8;
 		cube.position.set(posZ, 0.3, mapCenter.length - marginPaddle);
 	} else {
-		moveObject(cube);
+		movePaddleKeyboard();
+		// movePaddleKeyboard(paddleTwo);
 	}
 }
 
@@ -329,16 +342,18 @@ function moveSphere() {
 	deltaZ = sphereSpeed * Math.sin(angleRadian);
 
 	// using bounding box
-	boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+	// boundingBoxPaddle.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+	boundingPaddleOne.copy(paddleOne.geometry.boundingBox).applyMatrix4(paddleOne.matrixWorld);
+	boundingPaddleTwo.copy(paddleTwo.geometry.boundingBox).applyMatrix4(paddleTwo.matrixWorld);
 	boundingBoxSphere.copy(sphere.geometry.boundingBox).applyMatrix4(sphere.matrixWorld);
 
-	if (boundingBoxSphere.intersectsBox(boundingBoxPaddle) && !goingUp) {
+	if (boundingBoxSphere.intersectsBox(boundingPaddleOne) && !goingUp) {
 		const halfWidth = paddleWidth / 2;
 
 		sphereAngle = updateAngle(END);
 		goingUp = true;
 		
-		let startX = cube.position.x + 3;
+		let startX = paddleOne.position.x + 3;
 		let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
 		
 		sphereAngle = 270 + 90 * coefCollision;
@@ -347,15 +362,27 @@ function moveSphere() {
 		} else {
 			directionBall = RIGHT;
 		}
-	}
+	} else if (boundingBoxSphere.intersectsBox(boundingPaddleTwo) && goingUp) {
+		const halfWidth = paddleWidth / 2;
+
+		sphereAngle = updateAngle(END);
+		goingUp = false;
+		
+		let startX = paddleTwo.position.x + 3;
+		let coefCollision = (sphere.position.x + 4 - startX) / 2 - 0.5;
+		
+		sphereAngle = 90 + 90 * -coefCollision;
+		if (sphereAngle < 90) {
+			directionBall = RIGHT;
+		} else {
+			directionBall = LEFT;
+		}
+	} 
 
 	if (sphere.position.z >= mapCenter.length - sphereRadius && !goingUp) {
-		goingUp = true;
 		reloadGame(opponentGoal);
 	} else if (sphere.position.z <= -mapCenter.length + sphereRadius && goingUp) {
-		goingUp = false;
-		// reloadGame(playerGoal);
-		sphereAngle = updateAngle(END);
+		reloadGame(playerGoal);
 	}
 	if (boundingBoxSphere.intersectsBox(boundingWallLeft) && directionBall == LEFT) {
 		sphereAngle = updateAngle(LATERAL);
@@ -368,9 +395,7 @@ function moveSphere() {
 
 document.addEventListener("click", startGame);
 
-var mouseStartPos = [0, 0];
 var mousePos = [0, 0];
-var firstStart = true;
 var gameStart = false;
 const precisionLeaving = 200;
 
@@ -473,15 +498,17 @@ function initKeyboardEvent() {
 	
 		// console.log(lastKey);
 		if (lastKey == 87) {
-			movement.N = true;
+			movePaddleOne.N = true;
 		} else if (lastKey == 83) {
-			movement.S = true;
+			movePaddleOne.S = true;
 		} else if (lastKey == 65) {
-			movement.W = true;
-			mousePos[0] -= 10;
+			movePaddleOne.W = true;
 		} else if (lastKey == 68) {
-			movement.E = true;
-			mousePos[0] += 10;
+			movePaddleOne.E = true;
+		} else if (lastKey == 100) {
+			movePaddleTwo.W = true;
+		} else if (lastKey == 102) {
+			movePaddleTwo.E = true;
 		} else if (lastKey == 27) {
 			gameRunning = false;
 		}
@@ -490,13 +517,17 @@ function initKeyboardEvent() {
 		const lastKey = e.keyCode;
 	
 		if (lastKey == 87) {
-			movement.N = false;
+			movePaddleOne.N = false;
 		} else if (lastKey == 83) {
-			movement.S = false;
+			movePaddleOne.S = false;
 		} else if (lastKey == 65) {
-			movement.W = false;
+			movePaddleOne.W = false;
 		} else if (lastKey == 68) {
-			movement.E = false;
+			movePaddleOne.E = false;
+		} else if (lastKey == 100) {
+			movePaddleTwo.W = false;
+		} else if (lastKey == 102) {
+			movePaddleTwo.E = false;
 		}
 	});
 }
