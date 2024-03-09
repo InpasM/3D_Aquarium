@@ -569,21 +569,21 @@ initObjects();
 initGround();
 initLights();
 
-// if (USEMOUSE) {
-// 	initMouseEvent();
-// } else {
-// 	initKeyboardEvent();
-// }
+if (USEMOUSE) {
+	initMouseEvent();
+} else {
+	initKeyboardEvent();
+}
 
 setInterval(updateGame, 2);
 animate();
 
-// var playerScore = 0, opponentScore = 0;
-// const containerScore = document.querySelector(".container-score");
-// containerScore.style.position = "absolute";
-// containerScore.style.top = "20px";
-// containerScore.style.left = window.innerWidth / 2 - 30 + "px";
-// containerScore.style.color = "white";
-// containerScore.style.fontSize = "30px";
+var playerScore = 0, opponentScore = 0;
+const containerScore = document.querySelector(".container-score");
+containerScore.style.position = "absolute";
+containerScore.style.top = "20px";
+containerScore.style.left = window.innerWidth / 2 - 30 + "px";
+containerScore.style.color = "white";
+containerScore.style.fontSize = "30px";
 
-// updateScore();
+updateScore();
