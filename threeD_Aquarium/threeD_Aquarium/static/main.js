@@ -14,7 +14,7 @@ const scene = new THREE.Scene();
 
 let gameWidth = 0;
 // local multi
-const LOCALMULTI = true;
+const LOCALMULTI = false;
 const USEMOUSE = false;
 let camera2, renderer2;
 if (LOCALMULTI) {
@@ -105,9 +105,9 @@ function initMap() {
 }
 
 let aquarium;
-let boundingBoxSphere, boundingBoxPaddle;
+let boundingBoxSphere, boundingBoxPaddle, boundingCylinderPaddle;
 let geoCube, geoSphere;
-let paddleOne, paddleTwo, boundingPaddleOne, boundingPaddleTwo, cube, sphere;
+let cylinderPaddle, paddleOne, paddleTwo, boundingPaddleOne, boundingPaddleTwo, cube, sphere;
 const sphereRadius = 0.4;
 const paddleLength = 0.3;
 const paddleWidth = mapWidth * 0.2;
@@ -122,12 +122,20 @@ function initObjects() {
 	});
 	geoCube = new THREE.BoxGeometry(paddleWidth, 0.5, paddleLength);
 
-	paddleOne = new THREE.Mesh(geoCube, materialPaddle);
-	paddleOne.position.set(0, 0.3, mapCenter.length - marginPaddle);
-	paddleOne.castShadow = true;
-	boundingPaddleOne = new THREE.Box3().setFromObject(paddleOne);
-	boundingPaddleOne.copy(paddleOne.geometry.boundingBox).applyMatrix4(paddleOne.matrixWorld);
-	scene.add(paddleOne);
+	// paddleOne = new THREE.Mesh(geoCube, materialPaddle);
+	// paddleOne.position.set(0, 0.3, mapCenter.length - marginPaddle);
+	// paddleOne.castShadow = true;
+	// boundingPaddleOne = new THREE.Box3().setFromObject(paddleOne);
+	// boundingPaddleOne.copy(paddleOne.geometry.boundingBox).applyMatrix4(paddleOne.matrixWorld);
+	// scene.add(paddleOne);
+
+	const geoCylinder = new THREE.CylinderGeometry( 0.7, 0.7, 0.5, 32 ); 
+	cylinderPaddle = new THREE.Mesh(geoCylinder, materialPaddle);
+	cylinderPaddle.position.set(0, 0.3, mapCenter.length - marginPaddle);
+	cylinderPaddle.castShadow = true;
+	boundingCylinderPaddle = new THREE.Box3().setFromObject(cylinderPaddle);
+	boundingCylinderPaddle.copy(cylinderPaddle.geometry.boundingBox).applyMatrix4(cylinderPaddle.matrixWorld);
+	scene.add(cylinderPaddle);
 
 	paddleTwo = new THREE.Mesh(geoCube, materialPaddle);
 	paddleTwo.position.set(0, 0.3, -mapCenter.length + marginPaddle);
@@ -561,21 +569,21 @@ initObjects();
 initGround();
 initLights();
 
-if (USEMOUSE) {
-	initMouseEvent();
-} else {
-	initKeyboardEvent();
-}
+// if (USEMOUSE) {
+// 	initMouseEvent();
+// } else {
+// 	initKeyboardEvent();
+// }
 
 setInterval(updateGame, 2);
 animate();
 
-var playerScore = 0, opponentScore = 0;
-const containerScore = document.querySelector(".container-score");
-containerScore.style.position = "absolute";
-containerScore.style.top = "20px";
-containerScore.style.left = window.innerWidth / 2 - 30 + "px";
-containerScore.style.color = "white";
-containerScore.style.fontSize = "30px";
+// var playerScore = 0, opponentScore = 0;
+// const containerScore = document.querySelector(".container-score");
+// containerScore.style.position = "absolute";
+// containerScore.style.top = "20px";
+// containerScore.style.left = window.innerWidth / 2 - 30 + "px";
+// containerScore.style.color = "white";
+// containerScore.style.fontSize = "30px";
 
-updateScore();
+// updateScore();
